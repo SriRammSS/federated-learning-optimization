@@ -1,0 +1,4 @@
+run_type,seed,alpha,round,loss,accuracy,worst_client_accuracy,upload_bytes,download_bytes,total_comm_bytes,selected_clients,best_loss_so_far,best_round,rounds_since_improvement,stopped_early
+centralized,7,,1,0.2846226622660955,0.8770159006118774,0.5432098507881165,0,0,0,,0.2846226622660955,,0,False
+centralized,7,,2,0.13767571238180001,0.9506421109040578,0.8684210777282715,0,0,0,,0.13767571238180001,,0,False
+centralized,7,,3,1.3523865123589833,0.8099152982234955,0.6770833134651184,0,0,0,,0.13767571238180001,,1,False
