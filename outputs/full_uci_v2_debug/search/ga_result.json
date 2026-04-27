@@ -1,0 +1,191 @@
+{
+  "x": [
+    6.879572699668871,
+    4.473179940897994,
+    0.054913704135562375
+  ],
+  "fitness": 0.43779854347004576,
+  "evaluations": 18,
+  "history": [
+    {
+      "evaluation": 1,
+      "local_epochs": 7,
+      "clients_per_round": 11,
+      "lr": 0.05893815160885174,
+      "loss": 0.37397841761509576,
+      "accuracy": 0.8619576215744018,
+      "comm": 14182432,
+      "fitness": 0.5158027376150958
+    },
+    {
+      "evaluation": 2,
+      "local_epochs": 6,
+      "clients_per_round": 14,
+      "lr": 0.02091185326978309,
+      "loss": 0.720894189675649,
+      "accuracy": 0.8118701100349426,
+      "comm": 18050368,
+      "fitness": 0.901397869675649
+    },
+    {
+      "evaluation": 3,
+      "local_epochs": 3,
+      "clients_per_round": 13,
+      "lr": 0.014504574862491588,
+      "loss": 1.411061958471934,
+      "accuracy": 0.5311219374338786,
+      "comm": 16761056,
+      "fitness": 4.267453144133149
+    },
+    {
+      "evaluation": 4,
+      "local_epochs": 4,
+      "clients_per_round": 4,
+      "lr": 0.03438837598358285,
+      "loss": 0.6516751408576965,
+      "accuracy": 0.7616278092066447,
+      "comm": 5157248,
+      "fitness": 1.0869695287912495
+    },
+    {
+      "evaluation": 5,
+      "local_epochs": 6,
+      "clients_per_round": 10,
+      "lr": 0.07581662154146972,
+      "loss": 0.3577912757794062,
+      "accuracy": 0.8706709941228231,
+      "comm": 12893120,
+      "fitness": 0.4867224757794062
+    },
+    {
+      "evaluation": 6,
+      "local_epochs": 2,
+      "clients_per_round": 7,
+      "lr": 0.048857532553733,
+      "loss": 0.9561137815316518,
+      "accuracy": 0.6984454353650411,
+      "comm": 9025184,
+      "fitness": 2.061911267881241
+    },
+    {
+      "evaluation": 7,
+      "local_epochs": 1,
+      "clients_per_round": 7,
+      "lr": 0.004848258809314512,
+      "loss": 1.734563140074412,
+      "accuracy": 0.3185386354724566,
+      "comm": 9025184,
+      "fitness": 6.639428625349846
+    },
+    {
+      "evaluation": 8,
+      "local_epochs": 4,
+      "clients_per_round": 18,
+      "lr": 0.03864038914948127,
+      "loss": 0.5925052503744761,
+      "accuracy": 0.8313234070936839,
+      "comm": 23207616,
+      "fitness": 0.8245814103744761
+    },
+    {
+      "evaluation": 9,
+      "local_epochs": 8,
+      "clients_per_round": 17,
+      "lr": 0.0672589670688496,
+      "loss": 0.29417215287685394,
+      "accuracy": 0.8934228201707204,
+      "comm": 21918304,
+      "fitness": 0.5133551928768539
+    },
+    {
+      "evaluation": 10,
+      "local_epochs": 6,
+      "clients_per_round": 6,
+      "lr": 0.07581662154146972,
+      "loss": 0.3829081177711487,
+      "accuracy": 0.8503411451975504,
+      "comm": 7735872,
+      "fitness": 0.4602668377711487
+    },
+    {
+      "evaluation": 11,
+      "local_epochs": 5,
+      "clients_per_round": 6,
+      "lr": 0.055996676617840545,
+      "loss": 0.41949696888526283,
+      "accuracy": 0.8559341351191203,
+      "comm": 7735872,
+      "fitness": 0.4968556888852628
+    },
+    {
+      "evaluation": 12,
+      "local_epochs": 7,
+      "clients_per_round": 13,
+      "lr": 0.014504574862491588,
+      "loss": 0.8423014044761657,
+      "accuracy": 0.689008183280627,
+      "comm": 16761056,
+      "fitness": 2.1198301316698966
+    },
+    {
+      "evaluation": 13,
+      "local_epochs": 7,
+      "clients_per_round": 4,
+      "lr": 0.054913704135562375,
+      "loss": 0.38622606347004573,
+      "accuracy": 0.8595418234666189,
+      "comm": 5157248,
+      "fitness": 0.43779854347004576
+    },
+    {
+      "evaluation": 14,
+      "local_epochs": 7,
+      "clients_per_round": 11,
+      "lr": 0.06051986312522799,
+      "loss": 0.35492188135782876,
+      "accuracy": 0.872294690211614,
+      "comm": 14182432,
+      "fitness": 0.49674620135782876
+    },
+    {
+      "evaluation": 15,
+      "local_epochs": 7,
+      "clients_per_round": 3,
+      "lr": 0.041220106351228566,
+      "loss": 0.428548634548982,
+      "accuracy": 0.8569134672482809,
+      "comm": 3867936,
+      "fitness": 0.467227994548982
+    },
+    {
+      "evaluation": 16,
+      "local_epochs": 1,
+      "clients_per_round": 14,
+      "lr": 0.04425298028970391,
+      "loss": 1.3226747552553813,
+      "accuracy": 0.5176045596599579,
+      "comm": 18050368,
+      "fitness": 4.327132838655803
+    },
+    {
+      "evaluation": 17,
+      "local_epochs": 5,
+      "clients_per_round": 13,
+      "lr": 0.04753572561841639,
+      "loss": 0.47978002031644185,
+      "accuracy": 0.8294343988100688,
+      "comm": 16761056,
+      "fitness": 0.6473905803164418
+    },
+    {
+      "evaluation": 18,
+      "local_epochs": 6,
+      "clients_per_round": 4,
+      "lr": 0.03327484463944727,
+      "loss": 0.4944317569335302,
+      "accuracy": 0.8159936726093292,
+      "comm": 5157248,
+      "fitness": 0.5460042369335302
+    }
+  ]
+}

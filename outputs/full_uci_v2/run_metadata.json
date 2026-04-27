@@ -1,0 +1,22 @@
+{
+  "max_rounds": 1000,
+  "search_rounds": 300,
+  "patience": 30,
+  "min_delta": 0.001,
+  "seeds": [
+    7,
+    11,
+    19,
+    23,
+    29,
+    31,
+    37,
+    41,
+    43,
+    47
+  ],
+  "threads": 12,
+  "platform": "macOS-26.3.1-arm64-arm-64bit",
+  "torch_version": "2.11.0",
+  "model_parameters": 80582
+}
