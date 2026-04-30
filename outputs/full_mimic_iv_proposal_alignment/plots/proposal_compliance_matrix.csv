@@ -1,0 +1,8 @@
+proposal_claim,requirement,evidence_file,status,adaptation_note
+FedProx baseline,FedProx non-IID baseline,outputs/full_mimic_iv_proposal_alignment/metrics/fedprox_vs_fedavg_summary.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Convex logistic baseline,Convex empirical risk control,outputs/full_mimic_iv_proposal_alignment/metrics/logreg_method_summary.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Dirichlet beta study,"beta in {0.1, 0.5, 1.0, infinity}",outputs/full_mimic_iv_proposal_alignment/metrics/dirichlet_beta_summary.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Sparsity LP,l0/top-k communication cost,outputs/full_mimic_iv_proposal_alignment/lp/sparsity_lp_shadow_price.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Differential evolution,GA vs grid search,outputs/full_mimic_iv_proposal_alignment/search/proposal_ga_history.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Loss landscape,research visualization,outputs/full_mimic_iv_proposal_alignment/landscape/logreg_2d_loss_surface.csv,complete,MIMIC-IV adaptation preserving proposal concept
+Resource watchdog,OOM-safe execution,outputs/full_mimic_iv_proposal_alignment/monitoring/resource_timeseries.csv,complete,MIMIC-IV adaptation preserving proposal concept

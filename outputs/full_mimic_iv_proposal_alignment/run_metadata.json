@@ -1,0 +1,38 @@
+{
+  "mode": "local",
+  "mimic_out": "outputs/full_mimic_iv",
+  "old_training": "outputs/full_mimic_iv_training",
+  "features": 1021,
+  "natural_clients": 9,
+  "class_names": [
+    "survived",
+    "expired"
+  ],
+  "class_weights": [
+    0.5643545001851928,
+    4.384732214228617
+  ],
+  "base_config": {
+    "rounds": 80,
+    "max_rounds": 80,
+    "local_epochs": 1,
+    "clients_per_round": 5,
+    "lr": 0.005,
+    "batch_size": 256,
+    "seed": 7,
+    "cvar_alpha": 0.0,
+    "fairness_strength": 1.0,
+    "patience": 15,
+    "min_delta": 0.0005,
+    "early_stopping": true,
+    "monitor": "loss",
+    "class_weights": [
+      0.5643545001851928,
+      4.384732214228617
+    ],
+    "optimizer": "adam"
+  },
+  "device": "mps",
+  "logistic_parameters": 2044,
+  "mlp_parameters": 302914
+}

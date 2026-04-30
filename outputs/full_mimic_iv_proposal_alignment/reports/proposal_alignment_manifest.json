@@ -1,0 +1,1835 @@
+{
+  "output_root": "outputs/full_mimic_iv_proposal_alignment",
+  "created_at": 1777520532.775043,
+  "mode": "local",
+  "dataset_rows": 73141,
+  "natural_clients": 9,
+  "synthetic_dirichlet_clients": 30,
+  "platform": "macOS-26.3.1-arm64-arm-64bit",
+  "files": [
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_7_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 9873
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_11_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13071
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_19_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 9565
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_23_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13709
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_29_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10546
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_31_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 14035
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_37_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 11505
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_41_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 14693
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_43_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10215
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p0_seed_47_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 12451
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_7_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10035
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_11_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10035
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_19_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13005
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_23_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 12030
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_29_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13948
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_31_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 11026
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_37_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 12678
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_41_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 11701
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_43_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13958
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p001_seed_47_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13317
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_7_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 20884
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_11_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 15132
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_19_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 14194
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_23_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 18041
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_29_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 9985
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_31_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 25121
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_37_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 8686
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_41_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 14157
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_43_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 21272
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p01_seed_47_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 13195
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_7_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 9868
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_11_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 12493
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_19_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 9594
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_23_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 8981
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_29_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10575
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_31_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 16943
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_37_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 14366
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_41_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 15670
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_43_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 10557
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/fedprox_mu_0p1_seed_47_rounds.csv",
+      "description": "fedprox natural rounds",
+      "exists": true,
+      "bytes": 7041
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_7_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24914
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_7_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25380
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_7_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25608
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_7_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25368
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_7_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25608
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_7_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26398
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_7_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26908
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_7_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26660
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_7_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26443
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_11_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 23772
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_11_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25505
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_11_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24417
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_11_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24229
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_11_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24457
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_11_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25241
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_11_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25654
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_11_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25444
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_11_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25591
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_19_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24978
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_19_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25476
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_19_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25643
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_19_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25403
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_19_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25643
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_19_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26483
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_19_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 27029
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_19_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26738
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_19_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26535
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_23_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25029
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_23_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25469
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_23_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25698
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_23_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25458
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_23_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25698
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_23_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26547
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_23_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26996
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_23_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26758
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_23_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26549
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_29_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24973
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_29_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25483
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_29_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25698
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_29_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25458
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_29_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25698
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_29_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26512
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_29_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26971
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_29_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26744
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_29_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26542
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_31_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24361
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_31_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25486
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_31_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25688
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_31_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25448
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_31_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25688
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_31_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26518
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_31_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 27044
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_31_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26741
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_31_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26537
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_37_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 21607
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_37_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 22031
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_37_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 17794
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_37_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 17614
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_37_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 17779
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_37_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 22916
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_37_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 23324
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_37_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 23127
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_37_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 22912
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_41_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 23821
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_41_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 21731
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_41_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 21899
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_41_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 21695
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_41_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 21899
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_41_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25220
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_41_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25631
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_41_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25462
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_41_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26506
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_43_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25020
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_43_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24837
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_43_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25122
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_43_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 24888
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_43_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25122
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_43_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25874
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_43_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26339
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_43_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26056
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_43_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 25868
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedavg_seed_47_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25027
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.5_seed_47_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 23878
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.75_seed_47_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25729
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.9_seed_47_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25488
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_cvar_0.95_seed_47_rounds.csv",
+      "description": "logistic control rounds",
+      "exists": true,
+      "bytes": 25728
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p0_seed_47_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26488
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p001_seed_47_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26974
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p01_seed_47_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 26724
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/logreg_fedprox_mu_0p1_seed_47_rounds.csv",
+      "description": "logistic fedprox rounds",
+      "exists": true,
+      "bytes": 24875
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_7_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 369
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_7_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1097
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6297
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6391
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6308
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_11_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 416
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_11_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1249
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5475
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5527
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5523
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_19_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 357
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_19_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1055
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5704
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5783
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5777
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_23_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 499
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_23_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1601
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6338
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6414
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6437
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_29_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 395
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_29_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1244
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5694
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5752
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5740
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_31_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 445
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_31_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1451
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6376
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6460
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6456
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_37_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 368
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_37_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1157
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6010
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6055
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 6065
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_41_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 362
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_41_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1160
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5819
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5805
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 5876
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_43_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 464
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_43_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1438
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 7596
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 7715
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 7664
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_47_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 461
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p1_seed_47_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 1417
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedavg_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10134
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_fedprox_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10218
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p1_cvar_0.9_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10232
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_7_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 687
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_7_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2729
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10190
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10297
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_11_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 720
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_11_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2786
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10339
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 10481
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_19_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 720
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_19_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2713
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 16005
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 16189
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_23_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 721
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_23_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2816
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 15807
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 16032
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_29_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 716
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_29_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2704
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 9497
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 9640
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_31_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 695
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_31_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2648
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 14633
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 14770
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_37_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 699
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_37_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2689
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 11872
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 12072
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_41_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 720
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_41_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2789
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 12251
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 12391
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_43_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 717
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_43_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2806
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 17379
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 17563
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_47_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 723
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_0p5_seed_47_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2740
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedavg_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 17997
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_0p5_fedprox_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18207
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_7_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 701
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_7_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2775
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20201
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20423
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_11_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 727
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_11_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2822
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18701
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18857
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_19_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 734
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_19_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2835
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 24326
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 24632
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_23_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 729
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_23_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2838
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 16611
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 16833
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_29_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 728
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_29_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2811
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18184
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18342
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_31_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 727
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_31_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2824
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 17053
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 17937
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_37_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 727
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_37_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2858
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 22732
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 23009
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_41_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 727
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_41_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2847
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18462
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18668
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_43_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 724
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_43_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2846
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 19973
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 26422
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_47_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 726
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_1p0_seed_47_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 2801
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedavg_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20672
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_1p0_fedprox_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20923
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_7_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 856
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_7_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3121
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20580
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_7_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 20808
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_11_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_11_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3130
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 26467
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_11_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 26806
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_19_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_19_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3180
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 23085
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_19_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 23337
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_23_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_23_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3180
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 18803
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_23_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 19010
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_29_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_29_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3165
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 24022
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_29_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 24349
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_31_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_31_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3180
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 25352
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_31_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 22102
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_37_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_37_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3167
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 23374
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_37_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 23626
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_41_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_41_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3183
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 25409
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_41_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 29205
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_43_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_43_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3181
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 28005
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_43_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 28262
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_47_client_map.csv",
+      "description": "dirichlet client map",
+      "exists": true,
+      "bytes": 886
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/partitions/dirichlet_beta_infinity_seed_47_label_distribution.csv",
+      "description": "dirichlet label distribution",
+      "exists": true,
+      "bytes": 3180
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedavg_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 26878
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/dirichlet_beta_infinity_fedprox_seed_47_rounds.csv",
+      "description": "dirichlet rounds",
+      "exists": true,
+      "bytes": 27286
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/sparsity_round_updates.csv",
+      "description": "sparsity raw updates",
+      "exists": true,
+      "bytes": 10934400
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/search/proposal_grid_search.csv",
+      "description": "proposal grid search",
+      "exists": true,
+      "bytes": 2660
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/raw/all_round_metrics.csv",
+      "description": "aggregate output",
+      "exists": true,
+      "bytes": 4075095
+    },
+    {
+      "path": "outputs/full_mimic_iv_proposal_alignment/metrics/proposal_method_summary.csv",
+      "description": "aggregate output",
+      "exists": true,
+      "bytes": 7115
+    }
+  ]
+}

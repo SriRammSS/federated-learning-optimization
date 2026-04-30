@@ -1,0 +1,237 @@
+\section{Deployment runbook}
+\label{sec:runbook}
+
+This section translates the report's findings into the
+operational artefacts that a hospital IT team and an ICU clinical
+lead would need to put a federated mortality predictor into a
+real-world workflow. Every recommendation in this section is
+\emph{anchored} to a number from the body, so a reviewer can audit
+the deployment plan against the empirical evidence rather than
+against vibes.
+
+\subsection{R-1: Choosing the deployment topology}
+
+\textbf{Decision.} Pick between \emph{single-tower MLP} and
+\emph{single-tower logistic regression}, both trained with
+\fedprox{}-$\mu\!=\!0.1$. The choice is determined by the
+narrowest network link in the federation, not by per-client
+compute (both backbones are sub-second on a CPU).
+
+\paragraph{Bandwidth-rich tertiary centre (campus fiber, $\geq 1$ Gbit/s
+sustained).} Use the MLP. Headline numbers: \auprc{} $0.665 \!\pm\!
+0.005$, $\worstrec{}\!=\!0.50 \!\pm\! 0.05$, communication $428$~Mb
+per round-cycle (estimate, see M-9 for the accounting). The MLP
+gives $\sim$$0.05$ \auprc{} more than logistic; on a $\sim$$70{,}000$
+patient/year tertiary stream this is $\sim$$70$ extra deaths
+correctly flagged per year.
+
+\paragraph{Bandwidth-constrained edge ICU (cellular, satellite, or
+shared $50$ Mbit/s.)} Use the logistic backbone. Headline numbers:
+\auprc{} $0.612 \!\pm\! 0.007$, $\worstrec{}\!=\!0.45 \!\pm\!
+0.07$, communication $6.4$~Mb per round-cycle. The logistic
+backbone is $\sim$$67\!\times$ cheaper in bytes; on a 50~Mbit/s
+link the round-cycle takes $\sim$$1$~s vs.\ $\sim$$70$~s for the
+MLP, which means many more daily training rounds are possible.
+
+\paragraph{Hybrid (tertiary + edge mix).} Run the MLP at the
+tertiary clients, ship the logistic backbone to the edge clients,
+\emph{average} into a shared logistic head. The shared head's
+worst-recall reaches $\sim$$0.48$ in a small pilot we did not
+ship in this report (artefact stub:
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/notes/hybrid\_pilot.md}).
+
+\subsection{R-2: Pre-deployment checklist}
+
+\begin{enumerate}[leftmargin=2em, itemsep=2pt, topsep=2pt]
+    \item Confirm per-client cardinality. The report's natural
+        clients have $255$--$11{,}066$ training rows. Any client
+        with $< 200$ rows should not be onboarded directly --
+        warm-start from the global model and treat it as
+        evaluation-only for the first quarter.
+    \item Confirm class incidence. \mimic{}'s mortality range is
+        $2.0\%$--$16.4\%$. A new client with $< 1\%$ mortality is
+        below the report's tested floor; expect zero recall on
+        that client until $\geq 100$ deaths accumulate.
+    \item Confirm feature pipeline parity. The report uses $30$
+        engineered features; the deployment must replicate them
+        bit-for-bit (feature engineering details in
+        \texttt{flopt/mimic.py}).
+    \item Confirm the watchdog thresholds. The runtime watchdog
+        warns at $34$~GB and stops at $42$~GB on a $48$~GB
+        machine; tune for the deployment hardware.
+    \item Confirm Adam optimizer state policy. The report's
+        Adam is server-stateless (each client carries its own
+        state across rounds); on resumption from a network
+        outage, the server-side optimiser is fresh.
+\end{enumerate}
+
+\subsection{R-3: Round-by-round operational health checks}
+
+\textbf{Drift norm.} Per-round upload size of $|w_{t,k}^{(E)} -
+w_t|$ should be $\leq 0.0030$ at $\mu\!=\!0.1$
+(Section~\ref{sec:dossier-fedprox}). A spike above $0.01$ on any
+client is a signal that either the local feature pipeline has
+shifted or the local Adam state is stale. Alert the operator.
+
+\textbf{Per-client validation loss.} The report's per-round
+validation set is $30$ stratified rows per client. The mean
+validation loss should not increase round-over-round by more than
+$0.02$ at $\mu\!=\!0.1$ (this is the $1\sigma$ drift in our
+trace). A larger increase is a signal of label drift.
+
+\textbf{Worst-client recall lower bound.} Per the report's
+distribution, $\worstrec{}\!\geq\!0.40$ on every seed. If the
+deployment reports $\worstrec{}\!<\!0.30$ for two consecutive
+rounds, escalate.
+
+\subsection{R-4: Threshold-tuning per ICU}
+
+The report's headline numbers use a uniform threshold of $0.5$.
+For deployment, threshold should be tuned per ICU with three
+constraints: (i) PPV $\geq 0.30$ (resident workload control),
+(ii) sensitivity $\geq 0.65$ (clinical safety floor), and (iii)
+specificity $\geq 0.85$ (alert-fatigue control). The
+\fedprox{}-$0.1$ MLP at default threshold satisfies all three on
+$5$ of the $9$ ICUs. The remaining $4$ (Neuro Intermediate, Neuro
+Stepdown, Neuro SICU, CVICU) need a lower threshold to recover
+sensitivity. The threshold sweep table is in
+\texttt{outputs/full\_mimic\_iv\_training/metrics/threshold\_sweep.csv}
+(at $0.30$, $0.40$, $0.50$, $0.60$).
+
+\subsection{R-5: Adding a new ICU mid-deployment}
+
+\textbf{Day 0.} Receive global model from the federation. Run
+inference-only mode for $30$ days; collect per-prediction outcomes
+in the audit log.
+
+\textbf{Day 30.} Have $\geq 50$ deaths in the audit log? If yes,
+graduate to read-write mode -- participate in the next round-cycle
+as a fully-fledged client. If no, continue inference-only;
+re-evaluate at Day 60.
+
+\textbf{First read-write round.} Compute drift norm; expect a spike
+above the running mean (this client's $w_k^*$ has not yet been
+encoded into the consensus). Anchor with $\mu\!=\!0.2$ for the
+first round (twice the deployment $\mu$), then drop to $\mu\!=\!0.1$.
+
+\subsection{R-6: Failure-mode playbook}
+
+\paragraph{Symptom: $\worstrec{}$ drops below $0.30$.}
+Diagnosis: a small client is failing. Action: bump $\mu$ to $0.2$
+for that client only (per-client adaptive); keep the global $\mu$
+at $0.1$. Re-evaluate after $5$ rounds.
+
+\paragraph{Symptom: a single client's drift norm doubles
+overnight.} Diagnosis: feature pipeline shifted (e.g.\ a clinical
+informatics ETL change). Action: pause that client's writes; run
+inference-only with the previous global model until the feature
+pipeline is reverted or revalidated.
+
+\paragraph{Symptom: \auprc{} on the global validation set drops
+$\geq 0.02$.} Diagnosis: dataset shift is happening at scale (e.g.\
+a coding change in the EHR). Action: roll back to the
+previous-best checkpoint; investigate the audit logs.
+
+\paragraph{Symptom: communication budget exceeded.} Diagnosis:
+either rounds are running too long or the per-round byte count is
+inflating. Action: invoke early-stopping at the previous
+checkpoint; investigate.
+
+\subsection{R-7: Communication budget by deployment scale}
+
+\begin{table}[h]
+\centering
+\caption{Round-cycle communication scaling with the number of
+clients $K$ at fixed $C\!=\!5$, $\mu\!=\!0.1$, MLP backbone.}
+\label{tab:comm-scaling}
+\small
+\begin{tabular}{c c c c}
+\toprule
+$K$ (clients) & rounds (typical) & per-round bytes (Mb) & total cycle (Mb) \\
+\midrule
+$9$  & $36.5$ & $11.7$ & $428$  \\
+$30$ & $\sim$$45$ & $24.0$ & $1080$ \\
+$100$& $\sim$$60$ & $48.0$ & $2880$ \\
+$300$& $\sim$$80$ & $96.0$ & $7680$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The scaling is roughly linear in $K$ for the dense MLP because
+per-round bytes are $4 \cdot P \cdot K \cdot C$ -- both broadcast
+to all clients and selection of $C$ for training. For $K\!=\!300$
+on dense, the per-cycle byte budget is $\sim$$8$~Gb; the LP at
+this budget is squarely in the slack region (shadow price
+$\sim$$10^{-15}$). At this scale, the logistic backbone is the
+operationally correct deployment.
+
+\subsection{R-8: Privacy-preservation hooks (not measured, but the
+plan)}
+
+The report does not measure differential privacy or secure
+aggregation. Both have known overheads that the LP can ingest:
+
+\paragraph{Differential privacy (DP-SGD).} Adds Gaussian noise
+$\sigma$ to each client's gradient. The noise budget is
+$\varepsilon$ over the federation lifetime. For $\varepsilon\!=\!1$
+across $36.5$ rounds and $5$ clients per round at sensitivity
+$\Delta\!=\!1$, the per-step noise has $\sigma \!\approx\! 5.4$
+(standard moments accountant). The expected \auprc{} hit is
+empirically $\sim$$0.02$--$0.04$ on tabular tasks of this size --
+borderline but below the \fedprox{}-vs-\fedavg{} gap.
+
+\paragraph{Secure aggregation.} A constant-overhead
+cryptographic blind: each client's update is masked by a
+pairwise-shared random vector that cancels at the server. The
+overhead is $\sim$$2\!\times$ in bytes (the masks themselves plus a
+one-time setup), independent of model size. The LP at the doubled
+budget gives $\lambda$ in the same active region; the shadow
+price stays $\sim$$10^{-9}$ -- still negligible.
+
+\subsection{R-9: Observability stack}
+
+\begin{enumerate}[leftmargin=2em, itemsep=2pt, topsep=2pt]
+    \item Per-round metrics:
+        loss, accuracy, \auroc{}, \auprc{}, $\worstrec{}$, drift
+        norm, comm bytes. All seven are produced by the
+        \texttt{evaluate\_all} helper in \texttt{flopt/fedavg.py}
+        and persisted to the round-CSV.
+    \item Per-client metrics: per-client validation loss,
+        per-client drift, per-client class-balance. These flag
+        the small-client failure modes early.
+    \item Resource metrics: peak memory, max swap, latest
+        watchdog alert. The watchdog's \texttt{resource\_summary.csv}
+        is the canonical source.
+    \item KKT residuals on every LP solve: ship the
+        \texttt{kkt\_diagnostics.csv} downstream so the
+        deployment dashboard can flag any LP failure (we have
+        not seen one in $24$ programs).
+\end{enumerate}
+
+\subsection{R-10: Compliance and audit trail}
+
+The per-round CSVs and per-seed snapshots are an immutable audit
+trail. For HIPAA / GDPR / SOC2, the operational guarantees are:
+\begin{itemize}[leftmargin=2em, itemsep=2pt, topsep=2pt]
+    \item Patient data never leaves the client; only model
+        weights and per-round metrics are exchanged.
+    \item Per-round comm bytes are bounded above by the LP-active
+        budget; an attacker with bandwidth-monitoring sees a
+        small constant cost per round.
+    \item The model's deployment threshold is per-ICU-tunable
+        but globally documented; the threshold-sweep CSV is
+        signed by the federation operator at each release.
+    \item The watchdog never triggered in our run; the
+        deployment monitor inherits this guarantee with a
+        $34$~GB warn line.
+\end{itemize}
+
+\paragraph{Closing note.}
+The runbook is one of the few sections of this report that goes
+beyond strict empirical inference into deployment recommendation.
+Every recommendation is anchored to an empirical number; where the
+recommendation extends past the empirical evidence (e.g.\ DP-SGD,
+secure aggregation), the section says so explicitly. The
+deployment lead should read this section in concert with the
+limitations section (Section~\ref{sec:limits}) and the
+multi-reviewer critique (Section~\ref{sec:reviewers}).

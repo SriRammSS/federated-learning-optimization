@@ -1,0 +1,6 @@
+{
+  "validation_rows": 5000,
+  "landscape_1d_points": 41,
+  "landscape_2d_grid": 25,
+  "seed": 7
+}

@@ -1,0 +1,2 @@
+samples,memory_used_gb_max,memory_free_gb_min,swap_used_gb_max,latest_stage,platform
+477,9.277129359359996,41.74708211712,0.606748046875,loss_landscape,macOS-26.3.1-arm64-arm-64bit

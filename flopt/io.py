@@ -39,8 +39,9 @@ def write_csv(path:Path,rows:list[dict])->None:
 
 def flatten_round_records(records:list[dict],run_type:str,seed:int,alpha:float|None=None)->list[dict]:
     rows=[]
+    base_keys={"round","loss","accuracy","worst_client_accuracy","upload_bytes","download_bytes","selected_clients","best_loss_so_far","best_round","rounds_since_improvement","stopped_early","client_loss","client_accuracy","config","drift_client_ids","drift_update_norms","drift_cosine_to_mean","drift_distance_to_mean"}
     for r in records:
-        rows.append({
+        row={
             "run_type":run_type,
             "seed":seed,
             "alpha":alpha,
@@ -56,7 +57,11 @@ def flatten_round_records(records:list[dict],run_type:str,seed:int,alpha:float|N
             "best_round":r.get("best_round"),
             "rounds_since_improvement":r.get("rounds_since_improvement"),
             "stopped_early":r.get("stopped_early",False),
-        })
+        }
+        for k,v in r.items():
+            if k not in base_keys and (isinstance(v,(int,float,bool,str)) or v is None):
+                row[k]=v
+        rows.append(row)
     return rows
 
 
@@ -64,7 +69,7 @@ def convergence_summary(records:list[dict],run_type:str,seed:int,alpha:float|Non
     last=records[-1]
     best=min(records,key=lambda r:r["loss"])
     total_comm=sum(r["upload_bytes"]+r["download_bytes"] for r in records)
-    return {
+    out={
         "run_type":run_type,
         "seed":seed,
         "alpha":alpha,
@@ -78,3 +83,7 @@ def convergence_summary(records:list[dict],run_type:str,seed:int,alpha:float|Non
         "final_worst_client_accuracy":last["worst_client_accuracy"],
         "total_comm_until_stop":total_comm,
     }
+    for key in ["auroc","auprc","balanced_accuracy","sensitivity","specificity","worst_client_recall","worst_client_auprc"]:
+        if key in last:
+            out[f"final_{key}"]=last[key]
+    return out

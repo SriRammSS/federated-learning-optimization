@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader,TensorDataset
 
 from .config import FLConfig
 from .data import ClientData
-from .fedavg import _device,evaluate_all
+from .fedavg import _device,_loss_fn,_optimizer,evaluate_all
 
 
 def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tuple[nn.Module,list[dict]]:
@@ -18,8 +18,8 @@ def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tu
     x=np.concatenate([c.x_train for c in clients]).astype("float32")
     y=np.concatenate([c.y_train for c in clients]).astype("int64")
     loader=DataLoader(TensorDataset(torch.tensor(x),torch.tensor(y)),batch_size=cfg.batch_size,shuffle=True)
-    opt=torch.optim.SGD(model.parameters(),lr=cfg.lr)
-    loss_fn=nn.CrossEntropyLoss()
+    opt=_optimizer(model,cfg)
+    loss_fn=_loss_fn(cfg,device)
     records=[]
     best=float("inf")
     stale=0
@@ -66,8 +66,8 @@ def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:tor
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
     loader=DataLoader(TensorDataset(x,y),batch_size=cfg.batch_size,shuffle=True)
-    opt=torch.optim.SGD(model.parameters(),lr=cfg.lr)
-    loss_fn=nn.CrossEntropyLoss()
+    opt=_optimizer(model,cfg)
+    loss_fn=_loss_fn(cfg,device)
     epochs=cfg.local_epochs*max(1,min(cfg.max_rounds or cfg.rounds,50))
     for _ in range(epochs):
         for xb,yb in loader:

@@ -1,0 +1,6 @@
+{
+  "old_training_root": "outputs/full_mimic_iv_training",
+  "alignment_root": "outputs/full_mimic_iv_proposal_alignment",
+  "old_training_exists": true,
+  "validation": "alignment runner writes only to alignment_root"
+}

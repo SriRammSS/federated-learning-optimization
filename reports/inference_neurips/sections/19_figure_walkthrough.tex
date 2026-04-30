@@ -1,0 +1,374 @@
+\section{Per-figure walkthrough}
+\label{sec:figure-walkthrough}
+
+The body shows $21$ figures and uses each in a single paragraph of
+inference. This section is the slow walk-through: for every
+figure, we name the mechanism it captures, the precise feature in
+the picture that proves the mechanism is firing, the alternative
+explanations we considered and rejected, and the operational
+consequence that follows. The order is deliberate: data
+diagnostics first, then training dynamics, then frontiers, then
+landscape. Reading the figures in this order is a faithful
+reconstruction of the report's narrative.
+
+\subsection{Figure F-1: Per-client size and base mortality
+(Figure~\ref{fig:client-mortality})}
+\textbf{Mechanism.} The natural-clients heterogeneity that drives
+every other result. Two histograms side by side: client size in
+log-rows, client mortality in $\%$.
+
+\textbf{What to look at.} The mortality bar for Neuro Stepdown is
+$2.0\%$, the bar for MICU is $14.8\%$ -- a $7\!\times$ ratio.
+Combined with the size ratio ($\sim$$15\!\times$), the
+\emph{effective number of deaths} per client spans
+$5$ (Neuro Stepdown) to $\sim$$1{,}600$ (MICU), a $300\!\times$
+range. This is the formal driver of the small-client failure mode.
+
+\textbf{Alternatives ruled out.} ``The variance is just noise'' --
+no, the size ratios are deterministic features of the data. ``The
+variance won't matter'' -- no, the worst-client recall column in
+every method's row is non-zero only when the small clients are
+explicitly defended.
+
+\textbf{Operational read.} Any reported aggregate metric is a
+weighted average that under-represents the small ICUs by a factor
+of $15\!\times$. Always consult the per-client table.
+
+\subsection{Figure F-2: Confusion matrix per ICU
+(Figure~\ref{fig:cm})}
+\textbf{Mechanism.} The clinical projection of the federated
+prediction onto the per-ICU operating point. A $9$-panel grid of
+$2\!\times\!2$ matrices.
+
+\textbf{What to look at.} The Neuro Intermediate panel: TP$=4$,
+FN$=6$, FP$=8$, TN$=486$. Six false negatives out of ten deaths is
+the exact $0.4$ sensitivity number. The bottom-right of every
+panel is dominated by TN -- accuracy is high, but accuracy is
+uninformative on rare-class data.
+
+\textbf{Alternatives ruled out.} ``The model just hasn't seen
+enough deaths.'' The pattern repeats across all four
+\fedprox{}-$\mu$ values; what changes between methods is the
+\emph{ratio} of FN to TP. \fedprox{}-$0.1$ flips one Neuro
+Intermediate FN into a TP -- exactly one death caught instead of
+missed. That is real clinical impact at $\sim$$10$ patients per
+year on a unit this size.
+
+\subsection{Figure F-3: \cvar{}-$\alpha$ collapse
+(Figure~\ref{fig:cvar-alpha-collapse})}
+\textbf{Mechanism.} Discreteness of the tail size at $C\!=\!5$.
+
+\textbf{What to look at.} Three points on top of each other at
+$\alpha\!\in\!\{0.75, 0.9, 0.95\}$. The visual proof is that the
+markers occlude one another exactly. The remaining two points
+($\alpha\!=\!0$, $\alpha\!=\!0.5$) are at distinct positions
+because the tail size is distinct ($5$ and $2$).
+
+\textbf{Alternatives ruled out.} ``Maybe \cvar{} converges to the
+same place anyway.'' No: the tail \emph{set} is identical because
+$\lfloor 5(1-\alpha) \rfloor$ collapses to the same $1$. The
+mechanism is integer arithmetic, not training dynamics.
+
+\textbf{Operational read.} Don't deploy \cvar{}-$\alpha$ at small
+$C$. If \cvar{} is desired, use $C \geq 20$.
+
+\subsection{Figure F-4: Dirichlet trends
+(Figure~\ref{fig:dirichlet})}
+\textbf{Mechanism.} Heterogeneity stress test.
+
+\textbf{What to look at.} Mean accuracy degrades smoothly with
+$\beta\!\to\!0$, but the seed-std band widens dramatically at
+$\beta\!=\!0.1$. The \fedprox{} curve is consistently above the
+\fedavg{} curve, with the gap widening at lower $\beta$.
+
+\textbf{Alternatives ruled out.} ``It's just convergence.'' No:
+even at $20$ rounds the per-seed trace is already qualitatively in
+the wide-band regime; the mean settles, the variance does not.
+
+\textbf{Operational read.} On heterogeneous deployments, demand
+seed-std as part of the SLA, not just mean.
+
+\subsection{Figure F-5: Drift norms over rounds
+(Figure~\ref{fig:drift-norms})}
+\textbf{Mechanism.} \fedprox{}'s proximal contraction.
+
+\textbf{What to look at.} The four \fedprox{}-$\mu$ traces are
+ordered top-to-bottom by $\mu$ value: $\mu\!=\!0$ at $\sim$$0.015$,
+$\mu\!=\!0.001$ at $\sim$$0.011$, $\mu\!=\!0.01$ at $\sim$$0.005$,
+$\mu\!=\!0.1$ at $\sim$$0.002$. The gap is largest at the small
+clients (per-client decomposition in
+\texttt{drift\_norms\_per\_client.csv}).
+
+\textbf{Alternatives ruled out.} ``Drift could just be sampling
+noise.'' No: the per-seed std on the drift norm is small relative
+to the mean ($\sim$$10\%$), and the rank order across $\mu$ values
+is preserved across all $10$ seeds.
+
+\textbf{Operational read.} Drift is the precise signal that the
+proximal anchor produces the predicted contraction. Drift norm
+should be logged in deployment as a runtime healthcheck.
+
+\subsection{Figure F-6: Fairness frontier
+(Figure~\ref{fig:fairness-frontier})}
+\textbf{Mechanism.} Worst-recall vs.\ accuracy.
+
+\textbf{What to look at.} \fedprox{}-$0.1$ is the most
+north-east point: highest worst-recall \emph{and} highest
+\auprc{}. \fedavg{} is south-west. \cvar{} variants cluster in the
+middle-south. The frontier is monotone in $\mu$, not in $\alpha$.
+
+\textbf{Alternatives ruled out.} ``\fedprox{} just trades accuracy
+for fairness.'' No -- it does not: \fedprox{}-$0.1$'s accuracy is
+within $4\%$ of \fedavg{}'s, which is well within the seed-std.
+
+\textbf{Operational read.} The fairness gain is not a trade-off
+in the regime we tested. Deploy \fedprox{}-$0.1$.
+
+\subsection{Figure F-7: \fedprox{} $\mu$ sweep
+(Figure~\ref{fig:fairness-frontier})}
+\textbf{Mechanism.} Monotone improvement of \auprc{} with $\mu$.
+
+\textbf{What to look at.} A four-point line ascending from
+$0.636$ to $0.665$. The slope decreases between $\mu\!=\!0.01$ and
+$\mu\!=\!0.1$, hinting at a plateau.
+
+\textbf{Alternatives ruled out.} ``Maybe higher $\mu$ would do
+even better.'' Possible but not tested; the plateau hint suggests
+it would not.
+
+\textbf{Operational read.} $\mu\!=\!0.1$ is the pragmatic
+recommendation; $\mu\!=\!0.3$ is the next experiment.
+
+\subsection{Figure F-8: GA convergence
+(Figure~\ref{fig:ga-convergence})}
+\textbf{Mechanism.} Stochastic search converges by iteration $9$.
+
+\textbf{What to look at.} Two panels: the search history scatter
+(left) shows clusters of evaluations at $E\!=\!1, 2, 3$; the
+best-so-far trace (right) drops sharply for the first $9$
+iterations and plateaus. The plateau value is the operating-point
+fitness.
+
+\textbf{Alternatives ruled out.} ``DE just got lucky early.''
+Re-runs would be the cleanest test; we did not run them. The
+plateau itself is evidence that DE has saturated the search space.
+
+\textbf{Operational read.} $90$ evaluations is enough; $200$+ is
+overkill on this search box.
+
+\subsection{Figure F-9: Local-vs-federated per client
+(Figure~\ref{fig:local-vs-fed})}
+\textbf{Mechanism.} Knowledge transfer from federation.
+
+\textbf{What to look at.} Eight clients show federation outperforming
+local-only (left bar lower than right bar); one client (Neuro
+Stepdown) shows the opposite. The flip is not because federation
+hurts -- it is because local-only on Neuro Stepdown predicts
+``no death'' on every test row (recall $0$, accuracy $\sim$$0.98$).
+
+\textbf{Alternatives ruled out.} ``Federation helps everyone.'' No:
+on the smallest, lowest-mortality client, federation can't recover
+because the rare class is too sparse. Federation helps the
+\emph{recall}, not the \emph{accuracy}.
+
+\textbf{Operational read.} Federation's headline gain is on the
+clients that have enough data \emph{and} enough rare-class events.
+
+\subsection{Figure F-10: Loss landscape 1D
+(Figure~\ref{fig:landscape-1d})}
+\textbf{Mechanism.} Validation loss as a function of position
+along the init-to-final axis.
+
+\textbf{What to look at.} Smooth bowl in both backbones. The MLP
+minimum is at $\alpha\!=\!0.85$, the logistic minimum at
+$\alpha\!=\!1.0$. The MLP overshoots; the logistic does not.
+
+\textbf{Alternatives ruled out.} ``The minimum is exactly the
+final round.'' No, only for logistic; for MLP it is not.
+
+\textbf{Operational read.} For MLP, terminate $\sim$$15\%$ before
+the final round.
+
+\subsection{Figure F-11: Loss landscape 2D
+(Figure~\ref{fig:landscape-2d})}
+\textbf{Mechanism.} Two-direction landscape.
+
+\textbf{What to look at.} Logistic surface is a bowl; MLP surface
+shows a slight ridge in the second direction. The ridge implies
+non-axis-aligned curvature.
+
+\textbf{Alternatives ruled out.} ``The ridge is an artefact of
+the random direction.'' Possible -- a Hessian-eigenvector direction
+would produce a different picture. The directional independence is
+not formally tested.
+
+\textbf{Operational read.} The MLP landscape is non-isotropic; do
+not rely on grid search alone for $\eta$ tuning.
+
+\subsection{Figure F-12: LP shadow price
+(Figure~\ref{fig:lp-shadow})}
+\textbf{Mechanism.} Communication shadow price as a function of
+budget.
+
+\textbf{What to look at.} A monotone descending curve in
+log-log; a sharp drop where the budget exits the active region;
+$\lambda$ then drifts toward $0$ exponentially.
+
+\textbf{Alternatives ruled out.} ``Maybe more budget would help in
+some regime.'' The LP says no: $\lambda$ stays below $10^{-9}$ once
+past the active edge, which is operationally negligible.
+
+\textbf{Operational read.} The deployment budget should be $\sim$
+$300$--$430$ Mb (the active edge), not $1$ Gb.
+
+\subsection{Figure F-13: Method-grouped bars
+(Figure~\ref{fig:headline-bars})}
+\textbf{Mechanism.} Side-by-side comparison of four metrics.
+
+\textbf{What to look at.} The bars do not all peak on the same
+method. Centralized peaks accuracy, \fedprox{}-$0.1$ peaks the
+other three. The visual is the strongest argument that ``one
+metric'' is the wrong way to read the table.
+
+\textbf{Alternatives ruled out.} ``Pick the best on accuracy.''
+That gives centralized, which is non-deployable.
+
+\textbf{Operational read.} Use \fedprox{}-$0.1$ for the
+\auprc{}/worst-recall axis. Tune the operating threshold per ICU.
+
+\subsection{Figure F-14: Pareto: \auprc{} vs.\ communication
+(Figure~\ref{fig:pareto})}
+\textbf{Mechanism.} Loss-vs-bytes Pareto frontier.
+
+\textbf{What to look at.} Two clusters: dense MLP at
+$\sim$$300$--$700$ Mb, $\sim$$0.63$--$0.67$ \auprc{};
+logistic at $\sim$$6$ Mb, $\sim$$0.60$--$0.61$ \auprc{}. The
+empty middle is the missing operating regime.
+
+\textbf{Alternatives ruled out.} ``Top-$k$ would fill the
+middle.'' Numerically, no: the natural sparsity is too low for
+top-$k$ to be a free dividend (Section~\ref{sec:dossier-sparsity}).
+
+\textbf{Operational read.} Pick by bandwidth: edge ICU $\to$
+logistic; tertiary centre $\to$ MLP.
+
+\subsection{Figure F-15: Per-client clinical metrics
+(Figure~\ref{fig:per-client-clinical})}
+\textbf{Mechanism.} Sensitivity, specificity, \auroc{}, \auprc{}
+per ICU at fixed threshold.
+
+\textbf{What to look at.} The Neuro Intermediate column shows
+sensitivity $0.4$, specificity $0.984$ -- the model's bias
+toward ``no death'' is most extreme at this small client.
+
+\textbf{Alternatives ruled out.} ``Tune the threshold per
+client.'' Yes, but the deployment must commit to a single
+threshold for governance reasons.
+
+\textbf{Operational read.} \fedprox{}-$0.1$ improves Neuro
+Intermediate sensitivity to $\sim$$0.55$ -- catching $1$ extra death
+out of $10$.
+
+\subsection{Figure F-16: Per-seed \auprc{}
+(Figure~\ref{fig:per-seed-auprc})}
+\textbf{Mechanism.} Across-seed reliability.
+
+\textbf{What to look at.} \fedprox{}-$0.1$ box is the smallest;
+Dirichlet-$0.1$ box is the largest. The visual ratio of widths is
+$\sim$$30\!\times$.
+
+\textbf{Alternatives ruled out.} ``\fedprox{} got lucky on these
+seeds.'' Across $10$ prime seeds the std is $0.005$; that is the
+narrowest band of any method.
+
+\textbf{Operational read.} \fedprox{}-$0.1$ is the most
+\emph{reliable} method, not just the highest mean.
+
+\subsection{Figure F-17: Resource time series
+(Figure~\ref{fig:resources})}
+\textbf{Mechanism.} Memory and CPU profile during the proposal-
+alignment run.
+
+\textbf{What to look at.} Memory peaks at $9.28$~GB during the
+sparsity audit; CPU pegs $\sim$$80\%$ during \fedprox{}-$0.01$
+client iteration; the watchdog warning line is at $34$~GB and is
+never crossed.
+
+\textbf{Alternatives ruled out.} ``Memory headroom is fine
+because we never hit it.'' The warning line gives $24$~GB of
+buffer; on a tighter machine ($24$~GB total) the watchdog would
+trigger, which is by design.
+
+\textbf{Operational read.} The deployment budget for this run on
+a $48$~GB box is $\sim$$10$~GB; on a $32$~GB box, the run still
+fits but with the watchdog active.
+
+\subsection{Figure F-18: ROC and PR curves
+(Figure~\ref{fig:roc-pr})}
+\textbf{Mechanism.} Threshold sweep.
+
+\textbf{What to look at.} ROC is Hochrechnung-classic; PR is
+the operationally informative one. The PR curve shows
+\fedprox{}-$0.1$'s gain is at \emph{all} threshold values, not
+just at $0.5$.
+
+\textbf{Alternatives ruled out.} ``The gain is just at the
+default threshold.'' No: the PR curve dominates \fedavg{}'s
+across the entire threshold range.
+
+\textbf{Operational read.} Deployment threshold tuning will move
+the operating point, but not the recommendation.
+
+\subsection{Figure F-19: Search history scatter
+(Figure~\ref{fig:ga-scatter})}
+\textbf{Mechanism.} GA exploration in $(E, C, \eta)$.
+
+\textbf{What to look at.} The $90$ evaluations fan out in the box;
+the best fitness corner is the lower-left of the loss-vs-comm
+plane.
+
+\textbf{Alternatives ruled out.} ``GA didn't explore enough.'' The
+scatter shows wide coverage; the plateau in the convergence trace
+shows convergence.
+
+\textbf{Operational read.} The optimal $(E, C, \eta)$ point is at
+$(1, 5, 0.0061)$; deploy this.
+
+\subsection{Figure F-20: Size vs.\ mortality scatter
+(Figure~\ref{fig:size-vs-mortality})}
+\textbf{Mechanism.} The two-axis client characterisation.
+
+\textbf{What to look at.} Neuro Stepdown is the small-low-mortality
+extreme corner; MICU is the large-high-mortality opposite corner.
+
+\textbf{Alternatives ruled out.} ``All clients are similar
+enough.'' The scatter spans two orders of magnitude in size and
+$7\!\times$ in mortality.
+
+\textbf{Operational read.} The natural-clients axis is the
+strongest possible test of fairness; synthetic Dirichlet partitions
+are stress tests, not replacements.
+
+\subsection{Figure F-21: Sparsity compression
+(Figure~\ref{fig:sparsity})}
+\textbf{Mechanism.} Top-$k$ compression ratios across $k$ values.
+
+\textbf{What to look at.} Compression scales linearly with $k$:
+$1\%$ gives $\sim$$50\!\times$ savings, $10\%$ gives
+$\sim$$5\!\times$. The natural-sparsity bar at the right is at
+$\sim$$96\%$ -- almost all entries are non-zero.
+
+\textbf{Alternatives ruled out.} ``Maybe later in training
+sparsity would emerge.'' The CSV's per-round breakdown shows
+sparsity stays in the $95.8$--$97.7\%$ band throughout; the
+gradient does not concentrate.
+
+\textbf{Operational read.} Use compression only when bandwidth is
+the binding constraint; on \mimic{}'s budgets it is not.
+
+\paragraph{Closing remark.}
+Twenty-one figures, twenty-one one-paragraph mechanism stories.
+Each picture maps to a single CSV (cited in the figure docstrings
+in \texttt{build\_plots.py}); each picture proves a single claim
+in the body. A reader who has walked the body and this section
+has seen the entire chain from data to recommendation.

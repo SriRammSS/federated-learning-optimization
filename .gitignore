@@ -1,0 +1,74 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Virtual environment ---
+.venv/
+venv/
+env/
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# --- LaTeX build artefacts ---
+*.aux
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+*.out
+*.log
+*.lof
+*.lot
+*.bbl
+*.blg
+*.brf
+*.nav
+*.snm
+*.vrb
+
+# --- Large datasets / caches (do NOT commit these) ---
+data/kagglehub-cache/
+data/mimic_cache/
+data/UCI HAR Dataset/
+data/.DS_Store
+
+# Raw MIMIC preprocessed cache (135 MB, regenerable)
+outputs/full_mimic_iv/
+outputs/cache/
+outputs/mpl-cache/
+
+# UCI HAR raw data (committed snapshot kept in archived_experiments/)
+archived_experiments/uci_data/UCI HAR Dataset/
+archived_experiments/uci_data/uci_har_project_snapshot_*.zip
+
+# MIMIC-III demo raw data (LCP redistributable but large)
+archived_experiments/mimic_iii_demo/mimiciii-demo/
+
+# Shakespeare raw + processed data (regenerable from the loader)
+shakespeare/data/
+shakespeare/outputs/
+shakespeare/__pycache__/
+
+# DuckDB / parquet caches
+*.duckdb
+*.duckdb.wal
+*.parquet
+
+# Misc
+*.zip
+*.tar
+*.tar.gz
+
+# Allow critical small artefacts
+!outputs/full_mimic_iv_training/
+!outputs/full_mimic_iv_proposal_alignment/

@@ -16,4 +16,6 @@ class FLConfig:
     min_delta:float=0.001
     early_stopping:bool=False
     monitor:str="loss"
+    class_weights:tuple[float,...]|None=None
+    optimizer:str="sgd"
 
