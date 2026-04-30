@@ -1,0 +1,16 @@
+method,seed,pooled_neuro_auprc,pooled_neuro_recall_at_0p5,pooled_neuro_n,pooled_neuro_deaths
+fedprox_0p1,7,0.3512,0.5333,759,15
+fedprox_0p1,11,0.4008,0.6,759,15
+fedprox_0p1,13,0.3957,0.6,759,15
+fedprox_0p1,17,0.3702,0.6,759,15
+fedprox_0p1,23,0.395,0.6,759,15
+fedprox_0p01,7,0.3815,0.6,759,15
+fedprox_0p01,11,0.2991,0.5333,759,15
+fedprox_0p01,13,0.3201,0.4667,759,15
+fedprox_0p01,17,0.4332,0.6,759,15
+fedprox_0p01,23,0.3182,0.5333,759,15
+fedavg,7,0.2986,0.5333,759,15
+fedavg,11,0.3879,0.4,759,15
+fedavg,13,0.2898,0.2,759,15
+fedavg,17,0.2931,0.4,759,15
+fedavg,23,0.3538,0.5333,759,15

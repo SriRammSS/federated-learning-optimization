@@ -1,6 +1,12 @@
 \section{Deployment runbook}
 \label{sec:runbook}
 
+\noindent\fbox{\parbox{\textwidth}{
+\textbf{Critical Caveat:} All results in this report are from a \emph{single hospital} (Beth Israel Deaconess Medical Center, BIDMC). Cross-hospital deployment requires validation on external cohorts such as eICU. The ``intra-hospital federation across 9 ICU types'' framing is accurate; cross-hospital claims are not supported by these data. The SOFA comparison (Section~\ref{sec:sofa-baseline}) confirms the federated model outperforms standard-of-care severity scoring within BIDMC (\auprc{} 0.665 vs.\ 0.306), but this advantage may not transfer to other institutions with different charting practices, patient demographics, or ICU configurations. Per-ICU threshold optimization (Section~\ref{sec:threshold}) is essential: the uniform $t\!=\!0.5$ threshold is replaced by Youden-optimal thresholds ranging from 0.23 to 0.58 across ICU types.
+}}
+
+\vspace{1em}
+
 This section translates the report's findings into the
 operational artefacts that a hospital IT team and an ICU clinical
 lead would need to put a federated mortality predictor into a

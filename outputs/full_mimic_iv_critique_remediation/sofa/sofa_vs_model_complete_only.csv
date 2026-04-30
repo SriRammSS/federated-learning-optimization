@@ -1,0 +1,2 @@
+model,n,auroc,auprc
+SOFA-LR (complete only),13742,0.6966,0.4432
