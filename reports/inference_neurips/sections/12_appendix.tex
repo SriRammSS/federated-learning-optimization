@@ -1,0 +1,97 @@
+\appendix
+\section{Reproducibility appendix}
+\label{sec:appendix}
+
+This appendix is a single-page reproduction manifest. Everything in the report
+can be rebuilt from it.
+
+\paragraph{Software.} Python 3.12.0, PyTorch 2.5+, NumPy 1.26+, Pandas 2.2+,
+SciPy 1.13+, cvxpy 1.4+. Apple Silicon M4 Max, $48$~GB unified memory.
+
+\paragraph{Source paths.} All \texttt{*.csv} and \texttt{*.json} cited in the
+body are under
+\texttt{outputs/full\_mimic\_iv/} (preprocessing, EDA),
+\texttt{outputs/full\_mimic\_iv\_training/} (original MLP run, $1000$-round
+budget), and \texttt{outputs/full\_mimic\_iv\_proposal\_alignment/}
+(\fedprox{}, logistic, Dirichlet, sparsity, LP, landscape).
+
+\paragraph{Seeds.} The seed pool is $\{7, 11, 19, 23, 29, 31, 37, 41, 43,
+47\}$, identical for every method.
+
+\paragraph{To regenerate every figure.}
+\begin{lstlisting}
+.venv/bin/python reports/inference_neurips/build_plots.py
+\end{lstlisting}
+This reads the CSVs cited in this report and writes 21 PNGs to
+\texttt{reports/inference\_neurips/figures/}. Each figure has a docstring
+listing its source CSVs.
+
+\paragraph{To regenerate every CSV.}
+\begin{lstlisting}
+.venv/bin/python experiments/run_full_mimic_iv.py        # original run
+.venv/bin/python experiments/run_mimic_proposal_alignment.py  # proposal run
+\end{lstlisting}
+Both scripts write only to their respective output roots and never overwrite
+the other's outputs.
+
+\paragraph{KKT diagnostics (Reviewer 7's request).}
+Verbatim from \texttt{outputs/full\_mimic\_iv\_proposal\_alignment/lp/kkt\_diagnostics.csv}:
+all $24$ programs (12 dense $+$ 12 sparse) report \texttt{primal\_feasible=True},
+\texttt{dual\_feasible=True}, \texttt{kkt\_status=pass}, complementary
+slackness $\leq 8\!\times\!10^{-10}$, stationarity residual $\leq 5\!\times\!10^{-10}$.
+
+\paragraph{Statistical artefacts.}
+Effect sizes (Cohen's $d$) are in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/stats/effect\_sizes.csv}.
+Confidence intervals (BCa bootstrap, $1{,}000$ reps) are in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/stats/proposal\_confidence\_intervals.csv}.
+Paired-$t$ p-values are in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/stats/proposal\_paired\_tests.csv}.
+
+\paragraph{Code excerpts.} The single most important code change in the
+proposal-alignment run is the proximal term's iteration over named
+parameters (\texttt{flopt/fedprox.py}, lines $\sim$$70$--$78$):
+\begin{lstlisting}
+prox_term = 0.0
+for n, p in model.named_parameters():
+    prox_term = prox_term + (mu / 2.0) * ((p - global_state[n]) ** 2).sum()
+loss = ce(logits, y) + prox_term
+loss.backward()
+\end{lstlisting}
+Iterating over \texttt{named\_parameters()} (rather than
+\texttt{state\_dict().items()}) excludes BatchNorm/dropout buffers from the
+proximal term, which is necessary for correctness.
+
+\paragraph{Numerical tables (excerpts).}
+Table~\ref{tab:per-client-clinical-app} excerpts the per-client clinical
+metrics from
+\texttt{outputs/full\_mimic\_iv\_training/metrics/per\_client\_clinical\_metrics.csv}
+for the best-validated MLP.
+
+\begin{table}[h]
+\centering
+\caption{Per-client clinical metrics (best validated MLP).}
+\label{tab:per-client-clinical-app}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+ICU                  & Tests & Deaths & Acc.\ & \auprc{} & Sens. & Spec. \\
+\midrule
+CVICU                & 2893 & 123 & 0.924 & 0.530 & 0.683 & 0.935 \\
+CCU                  & 2080 & 267 & 0.845 & 0.693 & 0.813 & 0.849 \\
+MICU                 & 3985 & 589 & 0.776 & 0.693 & 0.835 & 0.766 \\
+MICU/SICU            & 3166 & 461 & 0.802 & 0.611 & 0.777 & 0.806 \\
+Neuro Intermediate   &  504 &  10 & 0.972 & 0.313 & 0.400 & 0.984 \\
+Neuro Stepdown       &  255 &   5 & 0.957 & 0.439 & 0.600 & 0.964 \\
+Neuro SICU           &  440 &  72 & 0.848 & 0.714 & 0.778 & 0.861 \\
+SICU                 & 2798 & 333 & 0.837 & 0.643 & 0.739 & 0.851 \\
+TSICU                & 2167 & 225 & 0.856 & 0.683 & 0.773 & 0.866 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Resource ledger.} Peak memory $9.28$~GB; min free $41.75$~GB; max
+swap $0.61$~GB; $477$ samples; latest stage \texttt{loss\_landscape}; platform
+\texttt{macOS-26.3.1-arm64-arm-64bit}. The watchdog (\texttt{flopt/resource\_watchdog.py})
+never triggered. Source:
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/monitoring/resource\_summary.csv}.

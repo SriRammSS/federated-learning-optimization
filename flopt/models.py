@@ -17,6 +17,24 @@ class HARMLP(nn.Module):
         return self.net(x)
 
 
+class TabularMLP(nn.Module):
+    def __init__(self,features:int,classes:int=2,hidden:tuple[int,...]=(128,64),dropout:float=0.0):
+        super().__init__()
+        layers=[]
+        in_features=features
+        for width in hidden:
+            layers.append(nn.Linear(in_features,width))
+            layers.append(nn.ReLU())
+            if dropout>0:
+                layers.append(nn.Dropout(dropout))
+            in_features=width
+        layers.append(nn.Linear(in_features,classes))
+        self.net=nn.Sequential(*layers)
+
+    def forward(self,x:torch.Tensor)->torch.Tensor:
+        return self.net(x)
+
+
 class LogisticModel(nn.Module):
     def __init__(self,features:int=561,classes:int=6):
         super().__init__()

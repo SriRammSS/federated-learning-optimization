@@ -1,0 +1,155 @@
+\section{Clinical interpretation}
+\label{sec:clinical}
+
+This section answers the question a clinician (rather than an ML researcher)
+should ask: \textit{If I deploy this model in my ICU, what does its behaviour
+mean for me?} We work through six concrete clinical scenarios, each grounded
+in a row of \texttt{outputs/full\_mimic\_iv\_training/metrics/}.
+
+\subsection{What ``$\auprc{}\!=\!0.665$ at $11.4\%$ base rate'' means at the bedside}
+The headline \auprc{} is $0.665$, computed on the held-out $18{,}288$-stay
+test set with $2{,}085$ deaths
+(\texttt{outputs/full\_mimic\_iv\_training/metrics/clinical\_scores.csv}).
+\emph{What this number is.} Average precision (the area under the
+precision-recall curve) is the precision averaged over all recall levels,
+weighted by the recall increment. For a model with $\auprc{}\!=\!0.665$ at
+base rate $0.114$, it means that at \emph{any} recall level, the model's
+precision is on average $5.84\!\times$ better than random. At the operating
+point chosen by the platform (threshold $0.5$, \emph{the default}), recall is
+$0.784$ and precision is $0.398$. Translation:
+\begin{itemize}[leftmargin=*,nosep]
+    \item For every $100$ patients the model flags as ``high risk,''
+        $\sim 40$ will actually die in this admission and $\sim 60$ will
+        survive. The $60$ are the false-positive cost.
+    \item For every $100$ patients who go on to die, $\sim 78$ are flagged
+        in time; $\sim 22$ are missed. The $22$ are the false-negative cost.
+    \item Of the patients the model says are low-risk (negative call), the
+        model is right for $\sim 96.8\%$. Said differently, if the model
+        says ``low risk,'' a clinician is justified in spending less surveillance
+        on that patient \emph{at first glance}, but should not trust this
+        for the smallest Neuro units (see below).
+\end{itemize}
+
+\subsection{Per-ICU calibration: why the same model behaves differently in MICU and Neuro}
+Per-client clinical metrics are in
+\texttt{outputs/full\_mimic\_iv\_training/metrics/per\_client\_clinical\_metrics.csv}
+and visualised in Figure~\ref{fig:per-client-clinical}. The $9$-row table is
+sorted by AUPRC. The headline observations:
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{Best AUPRC} -- Neuro SICU $0.71$. Why: the highest local
+        mortality rate ($16.3\%$), so the model's positive predictions are
+        well-anchored in real positives.
+    \item \textbf{Worst AUPRC} -- Neuro Intermediate $0.31$. Why: only $10$
+        deaths in the test fold; the rare-class baseline AUPRC is itself low,
+        so even the best model cannot achieve high AUPRC. This is the
+        \emph{statistical floor}, not the \emph{algorithmic floor}.
+    \item \textbf{Recall (sensitivity) range} -- $0.40$ at Neuro Intermediate
+        to $0.84$ at MICU. The $0.40$ is bad in absolute terms ($4/10$ deaths
+        caught) but \emph{across only $10$ deaths in the test fold the
+        $95\%$ confidence interval on this number is wide.} A clinician should
+        not over-interpret a single ICU's recall when the underlying death
+        count is single-digit.
+    \item \textbf{Precision range} -- $0.20$ at Neuro Stepdown to $0.52$ at
+        Neuro SICU. Low-mortality-rate ICUs predictably have low precision
+        because most positive predictions there are bound to be false
+        positives.
+\end{itemize}
+\paragraph{What this means for deployment.} A federated model serving all $9$
+units must publish a per-ICU operating-point card: ``in MICU, expect $84\%$
+recall and $52\%$ precision; in Neuro Intermediate, expect $40\%$ recall and
+$20\%$ precision; the smaller units should be combined with manual review
+because their per-bed alarm rate at threshold $0.5$ is too high to be
+operationally tolerable.''
+
+\subsection{Calibration is good (ECE $=0.019$); what that buys}
+The expected calibration error is $0.019$, maximum calibration error $0.056$
+(\texttt{calibration/calibration\_summary.csv}). At ECE $\sim 2\%$, the
+model's predicted probability is, on average, within $\pm 2\%$ of the realised
+death rate within each probability bin. Clinical implication:
+\begin{itemize}[leftmargin=*,nosep]
+    \item If the model says ``$70\%$ probability of in-hospital death,'' a
+        clinician can reasonably interpret that as ``$\sim 68$--$72$
+        out of $100$ similar patients will die.''
+    \item This makes the model usable in shared-decision settings (palliative
+        consult triggers, family conversations) where probability calibration
+        matters more than ranking quality.
+\end{itemize}
+A poorly calibrated model with the same AUPRC would be unusable in those
+settings -- the score would be a ranking, not a probability. So although
+\fedprox{}-$0.1$ has \emph{lower} accuracy than centralized, its calibrated
+probability is what makes it deployable.
+
+\subsection{The $451$ false negatives}
+The confusion matrix (\texttt{metrics/confusion\_matrix.csv}, visualised in
+Figure~\ref{fig:cm}) records $451$ false negatives at the default threshold:
+patients who died and were not flagged. This is the
+\emph{single most clinically expensive number in the report}. It is bounded
+above by $2{,}085$ deaths $\times (1 - 0.784) = 451$, exactly the table value.
+What can be said about these $451$:
+\begin{itemize}[leftmargin=*,nosep]
+    \item They are concentrated in the small units. Neuro Intermediate alone
+        contributes $10\!\cdot\!(1\!-\!0.40) = 6$ false negatives; CVICU
+        contributes $123\!\cdot\!(1\!-\!0.68) = 39$.
+    \item Lowering the threshold from $0.5$ to $0.3$ would convert most of
+        these false negatives to true positives at the cost of doubling the
+        false-positive count (an estimate from the PR curve). The
+        operationally correct threshold is therefore unit-specific. We discuss
+        unit-specific thresholds in \S\ref{sec:future}.
+\end{itemize}
+
+\subsection{Federation gain over local-only, by unit}
+Figure~\ref{fig:local-vs-fed} shows the per-client AUPRC gain of the federated
+model over the local-only model. Every unit gains; the smallest gainers are
+the largest units (MICU $+0.07$); the largest gainers are the smallest units
+(Neuro Stepdown $+0.32$, Neuro Intermediate $+0.21$, CCU $+0.15$).
+
+\paragraph{Clinical interpretation.} The federation pays for itself most for
+the units that need it most. This is, somewhat ironically, exactly the
+opposite of the size-weighting bias \fedavg{} starts with. The reason
+\fedprox{}-$0.1$ is the right method is that this gain is preserved
+\emph{without sacrificing} worst-recall, which a naive aggregator would.
+
+\paragraph{Operational consequence.} A small ICU running its own model in
+isolation cannot beat its local data limit. A small ICU joining a federation
+that uses \fedprox{} gets the equivalent of $5$--$10\!\times$ more training
+data without any patient-level data leaving its walls. The headline number for
+this gain is $+0.21$ AUPRC at Neuro Intermediate; that means going from
+``effectively no rare-class signal'' to ``a usable rare-class signal at
+threshold $0.5$.''
+
+\subsection{What the model does \emph{not} do}
+\begin{itemize}[leftmargin=*,nosep]
+    \item It does not predict cause-of-death (it is binary).
+    \item It does not predict $7$-day, $30$-day, or post-discharge mortality
+        (the label is in-hospital death only, in the indexed admission).
+    \item It does not adjust for treatment effect; the model is purely
+        observational and predicts risk under the treatment regimens already
+        delivered to the cohort.
+    \item It does not handle real-time updating; the prediction is a single
+        24-hour point estimate at admission.
+\end{itemize}
+A clinical user must keep these scope limits in mind. They are documented in
+the data dictionary
+(\texttt{outputs/full\_mimic\_iv/preprocessing/preprocessing\_metadata.json})
+and are inherited from the cohort definition.
+
+\subsection{Why \fedprox{}-$0.1$ is the deployment recommendation, despite lower accuracy}
+Putting it together: we recommend \fedprox{}-$0.1$ on the MLP backbone for
+deployment, even though centralized has $7\%$ higher accuracy. The reasons,
+in clinical priority order:
+\begin{enumerate}[leftmargin=*,nosep]
+    \item \textbf{Worst-recall is $3\!\times$ higher} ($0.50$ vs.\ $0.16$). The
+        deployed model will not embarrass itself in the small Neuro units.
+    \item \textbf{AUPRC is $0.08$ higher} ($0.665$ vs.\ $0.585$). On a rare-class
+        problem, this is the metric that translates to clinical utility.
+    \item \textbf{Calibration is preserved} (ECE $\sim 2\%$).
+    \item \textbf{Communication is bounded} ($\sim 428$~MB total over the entire
+        training run). For comparison, a single high-resolution chest CT is
+        $\sim 200$~MB; the entire model training upload-plus-download fits
+        in less than $3$ chest CTs.
+    \item \textbf{The model fits in memory} ($1.2$~MB on disk for the MLP weights;
+        well under any deployment laptop's RAM).
+\end{enumerate}
+The accuracy gap is the price of fairness; on a rare-class clinical task
+where the worst $1{,}000$ patients matter more than the best $40{,}000$, this
+is a price worth paying.

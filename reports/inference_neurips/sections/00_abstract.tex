@@ -1,0 +1,46 @@
+\begin{abstract}
+We study federated optimization for 24-hour ICU mortality prediction on
+\mimic{} with 9 natural ICU clients (73{,}141 stays, 1{,}021 features, 11.4\% positive
+rate). We empirically evaluate \fedavg{}, \fedprox{} with $\mu \in
+\{0,10^{-3},10^{-2},10^{-1}\}$, \cvar{}-style aggregation reweighting at $\alpha
+\in \{0, 0.5, 0.75, 0.9, 0.95\}$, centralized and local-only baselines,
+hyperparameter search via grid search and differential evolution (90 evaluations
+in the proposal run, 48 in the original run), an LP-duality policy program with
+KKT diagnostics over a 12-budget sweep, top-$k$ communication compression at
+$k\!\in\!\{1,5,10,25,100\}\%$, a synthetic Dirichlet study at $\beta \in \{0.1,
+0.5, 1.0, \infty\}$ with $K\!=\!30$ synthetic clients, and 1D / 2D loss-landscape
+interpolation on both \emph{TabularMLP} (302{,}914 parameters) and
+\emph{LogisticModel} (2{,}044 parameters) backbones.
+
+Three findings dominate. \textbf{(i)} \fedprox{} with $\mu \!=\! 0.1$ is the
+single best-balanced method on natural clients, attaining
+$\auprc \!=\! 0.665 \pm 0.005$, $\auroc \!=\! 0.913 \pm 0.001$, and worst-client
+recall $0.50 \pm 0.05$, while spending $\sim$25\% \emph{less} communication than
+\fedavg{}. The convex logistic backbone reproduces the same $\mu \!=\! 0.1$ winner
+($\auprc \!=\! 0.612 \pm 0.007$, paired-$t$ effect size $+1.03$ vs.\ \fedavg{}),
+demonstrating the result is not an MLP non-convexity artefact. \textbf{(ii)}
+Client heterogeneity is the dominant fairness driver. The Dirichlet sweep
+collapses worst-client recall to $0$ at $\beta \!=\! 0.1$ for every method we tried;
+at $\beta \!=\! \infty$ \fedprox{} restores it to $0.727 \pm 0.022$ -- a $7.27 \!\times\!
+10^{-1}$ swing dwarfing every other intervention, including \cvar{}, search, and
+sparsity. \textbf{(iii)} The communication-vs-loss frontier is mostly flat: the
+LP shadow price drops from $\lambda \!\sim\! 10^{-9}$ (active region) to
+$\lambda \!\sim\! 10^{-19}$ (numerical zero) by budget $\!\sim\!3.5\!\times\!10^{8}$
+bytes, meaning the LP identifies a small ``elbow'' regime above which extra
+budget purchases nothing. Top-$k$ compression at $1\%$ delivers $\sim\!49\!\times$ savings
+because update updates are only $95.8$--$97.7\%$ nonzero -- the compression mechanism is
+\emph{truncation}, not natural sparsity.
+
+We pair every empirical claim with a mechanism: \textbf{why} \fedprox{} wins is
+the proximal anchor flattening per-round drift on the heaviest small-mortality
+unit (Neuro Intermediate, $1.99\%$ mortality), \textbf{why} \cvar{}-$\alpha\!\geq\!0.75$
+plateaus is a discreteness artefact of $C\!=\!5$ sampled clients per round
+($\lfloor 0.05\!\times\!5 \rfloor = 0$ tail), \textbf{why} GA beats grid is an off-grid
+learning rate ($\eta \!=\! 0.0029$) outside the discrete grid mesh, and \textbf{why}
+the LP shadow price collapses is the simplex constraint becoming binding before
+the budget does. The report is structured as 12 reviewer rounds with logged
+diffs (Section~\ref{sec:critique}) and a 10-rotation tables-turned counter-stress
+(Section~\ref{sec:tables-turned}). All numerical claims cite a CSV/JSON file
+under \texttt{outputs/}; all 21 figures are rendered from those CSVs by
+\texttt{reports/inference\_neurips/build\_plots.py}.
+\end{abstract}

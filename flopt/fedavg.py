@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader,TensorDataset
+from sklearn.metrics import average_precision_score,balanced_accuracy_score,confusion_matrix,roc_auc_score
 
 from .config import FLConfig
 from .data import ClientData
@@ -76,8 +77,8 @@ def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
     loader=DataLoader(TensorDataset(x,y),batch_size=cfg.batch_size,shuffle=True)
-    opt=torch.optim.SGD(model.parameters(),lr=cfg.lr)
-    loss_fn=nn.CrossEntropyLoss()
+    opt=_optimizer(model,cfg)
+    loss_fn=_loss_fn(cfg,device)
     last_loss=0.0
     for _ in range(cfg.local_epochs):
         for xb,yb in loader:
@@ -95,28 +96,67 @@ def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch
 def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->dict:
     client_loss=[]
     client_acc=[]
+    client_recall=[]
+    client_auprc=[]
+    all_true=[]
+    all_pred=[]
+    all_prob=[]
     for client in clients:
-        loss,acc=evaluate(model,client,device)
+        loss,acc,y_true,y_pred,prob=evaluate_details(model,client,device)
         client_loss.append(loss)
         client_acc.append(acc)
+        if len(set(y_true.tolist()))>1:
+            client_auprc.append(float(average_precision_score(y_true,prob)))
+        else:
+            client_auprc.append(0.0)
+        tn,fp,fn,tp=confusion_matrix(y_true,y_pred,labels=[0,1]).ravel()
+        client_recall.append(float(tp/(tp+fn)) if tp+fn else 0.0)
+        all_true.append(y_true)
+        all_pred.append(y_pred)
+        all_prob.append(prob)
+    y_true=np.concatenate(all_true) if all_true else np.array([])
+    y_pred=np.concatenate(all_pred) if all_pred else np.array([])
+    prob=np.concatenate(all_prob) if all_prob else np.array([])
+    clinical={}
+    if len(y_true) and set(y_true.tolist())<= {0,1}:
+        tn,fp,fn,tp=confusion_matrix(y_true,y_pred,labels=[0,1]).ravel()
+        clinical={
+            "auroc":_safe_metric(lambda:roc_auc_score(y_true,prob)),
+            "auprc":_safe_metric(lambda:average_precision_score(y_true,prob)),
+            "balanced_accuracy":float(balanced_accuracy_score(y_true,y_pred)),
+            "sensitivity":float(tp/(tp+fn)) if tp+fn else 0.0,
+            "specificity":float(tn/(tn+fp)) if tn+fp else 0.0,
+            "worst_client_recall":float(np.min(client_recall)),
+            "worst_client_auprc":float(np.min(client_auprc)),
+        }
     return {
         "loss":float(np.mean(client_loss)),
         "accuracy":float(np.mean(client_acc)),
         "worst_client_accuracy":float(np.min(client_acc)),
         "client_loss":client_loss,
         "client_accuracy":client_acc,
+        **clinical,
     }
 
 
 @torch.no_grad()
 def evaluate(model:nn.Module,client:ClientData,device:torch.device)->tuple[float,float]:
+    loss,acc,_,_,_=evaluate_details(model,client,device)
+    return loss,acc
+
+
+@torch.no_grad()
+def evaluate_details(model:nn.Module,client:ClientData,device:torch.device):
     model.eval()
     x=torch.tensor(client.x_test,dtype=torch.float32,device=device)
     y=torch.tensor(client.y_test,dtype=torch.long,device=device)
     logits=model(x)
     loss=float(nn.CrossEntropyLoss()(logits,y).detach().cpu())
-    acc=float((logits.argmax(1)==y).float().mean().detach().cpu())
-    return loss,acc
+    probs=torch.softmax(logits,dim=1)
+    pred=probs.argmax(1)
+    acc=float((pred==y).float().mean().detach().cpu())
+    prob=probs[:,1].detach().cpu().numpy() if probs.shape[1]>1 else probs[:,0].detach().cpu().numpy()
+    return loss,acc,y.detach().cpu().numpy(),pred.detach().cpu().numpy(),prob
 
 
 @torch.no_grad()
@@ -143,6 +183,26 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
                 **{f"prob_{j}":float(probs[i,j].cpu()) for j in range(probs.shape[1])},
             })
     return rows
+
+
+def _loss_fn(cfg:FLConfig,device:torch.device)->nn.Module:
+    weights=None
+    if cfg.class_weights:
+        weights=torch.tensor(cfg.class_weights,dtype=torch.float32,device=device)
+    return nn.CrossEntropyLoss(weight=weights)
+
+
+def _optimizer(model:nn.Module,cfg:FLConfig):
+    if cfg.optimizer=="adam":
+        return torch.optim.Adam(model.parameters(),lr=cfg.lr)
+    return torch.optim.SGD(model.parameters(),lr=cfg.lr)
+
+
+def _safe_metric(fn)->float:
+    try:
+        return float(fn())
+    except ValueError:
+        return 0.0
 
 
 def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.ndarray:

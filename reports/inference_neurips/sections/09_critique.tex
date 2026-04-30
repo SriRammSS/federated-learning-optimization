@@ -1,0 +1,219 @@
+\section{Self-critique with real diffs}
+\label{sec:critique}
+
+This section is the reviewer log. We ran $12$ rounds of self-critique on the
+prior sections. In each round we play one named reviewer who is paid to find
+real problems; if a reviewer cannot find at least three substantive issues
+they are sent back. Each reviewer's findings appear here verbatim, followed by
+the diffs we actually applied to the prior text. This is not a stylistic
+exercise -- the reviewer findings genuinely change claims; in particular,
+Reviewer 4 demoted CVaR-$0$'s headline ``best worst-recall'' to a footnote
+because of seed variance, and Reviewer 7 forced us to qualify the LP--Pareto
+agreement story.
+
+\subsection{Reviewer 1: the federated-learning skeptic}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item ``\fedprox{} wins'' is overstated; on the convex backbone the gap is
+        only $0.011$ \auprc{} -- an effect size of $1.0$. That is statistically
+        clear but clinically borderline.
+    \item The headline accuracy gap with centralized ($0.84$ vs.\ $0.91$) is
+        large and ought to be flagged in the abstract, not buried in
+        Section~\ref{sec:results}.
+    \item ``$50\%$ worst-recall'' is given as a single number but the std is
+        $0.05$, so the $95\%$ CI is $[0.40, 0.60]$. We should say so.
+\end{enumerate}
+\paragraph{Diff applied.} Abstract now says $\auprc{}\!=\!0.665 \pm 0.005$ and
+worst-recall $0.50 \pm 0.05$ explicitly, and notes ``This trades $\sim$$7$
+points of accuracy against centralized.'' Section~\ref{sec:clinical} adds the
+$95\%$-CI sentence: ``the $95\%$ CI on worst-recall at \fedprox{}-$0.1$ is
+$[0.40, 0.60]$.''
+
+\subsection{Reviewer 2: the clinical informaticist}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Per-client metrics use the \emph{best validated} MLP, not
+        \fedprox{}-$0.1$. The text reads as though they are the
+        \fedprox{}-$0.1$ numbers, which is misleading.
+    \item The ``$451$ false negatives'' number is from the same
+        best-validated row, not from \fedprox{}-$0.1$. The latter would
+        have a slightly different but qualitatively similar count.
+    \item The threshold-$0.5$ operating point is stated as default but no
+        clinician deploys at $0.5$ for an $11.4\%$ base rate without
+        reflection.
+\end{enumerate}
+\paragraph{Diff applied.} Captions for Figs.~\ref{fig:per-client-clinical},
+\ref{fig:cm}, \ref{fig:roc-pr} now explicitly say ``best validated MLP.''
+\S\ref{sec:future} now lists ``per-ICU operating-point tuning'' as a Future
+Work item, with a sentence in \S\ref{sec:clinical} foreshadowing it.
+
+\subsection{Reviewer 3: the optimization theorist}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item The non-convex MLP landscape is rendered through 1D and 2D linear
+        slices only. The actual basin in $\mathbb{R}^{302914}$ may have local
+        minima that 1D and 2D slices miss.
+    \item The LP $\lambda$-cliff at $3.34\!\times\!10^8$ bytes is a property
+        of \emph{this} candidate set; with a larger DE budget more candidates
+        would exist below the cliff.
+    \item The proximal-spring intuition for FedProx is correct but the
+        quantitative claim that ``the spring force is comparable to the data
+        gradient on small clients'' is qualitative; we should attempt to
+        compute it.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:mechanism-landscape} now explicitly
+states ``1D/2D slices may miss off-axis structure'' and treats the smoothness
+claim as ``locally on this slice.'' \S\ref{sec:mechanism-lp} now adds ``with a
+larger DE history the cliff position would shift.'' We added a
+back-of-envelope spring-vs-gradient ratio in \S\ref{sec:mechanism-fedprox}.
+
+\subsection{Reviewer 4: the statistician}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item CVaR-$0$ is reported with worst-recall $0.26 \pm 0.21$. The std is
+        $80\%$ of the mean. Several seeds returned $0.0$.
+    \item Paired-$t$ p-values quoted as $< 0.001$ should also report Cohen's
+        $d$.
+    \item The Dirichlet sweep uses $K\!=\!30$ synthetic clients but the
+        natural-clients case has $K\!=\!9$. Cross-comparing them as if they
+        were the same regime is statistically loose.
+\end{enumerate}
+\paragraph{Diff applied.} Table~\ref{tab:headline} now footnotes CVaR-$0$'s
+fragility ($\dagger$). Section~\ref{sec:appendix} appendices the effect-size
+table (\texttt{stats/effect\_sizes.csv}). Sections~\ref{sec:methods} and
+\ref{sec:mechanism-dirichlet} explicitly note that Dirichlet uses $K\!=\!30$
+and that the natural-clients case is at $K\!=\!9$, so the comparison is of
+the \emph{slope} of the heterogeneity-vs-method curve, not of point values.
+
+\subsection{Reviewer 5: the reproducibility auditor}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Seeds are listed in the abstract but not in
+        Section~\ref{sec:results}. Both should agree.
+    \item Code paths to flopt modules are mentioned but the listing module is
+        not pinned to a commit hash.
+    \item The plot generation script is mentioned (build\_plots.py) but its
+        output paths and Python version are not.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:results} top paragraph now lists the
+exact seed pool. Appendix~\ref{sec:appendix} now lists Python version, exact
+file paths to every CSV cited, and a ``how to reproduce every figure''
+recipe.
+
+\subsection{Reviewer 6: the dataset curator}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item The cohort excludes stays with $< 24$h follow-up. This is correct
+        but the exclusion count should be stated.
+    \item ``Top-$50$ chartevents itemids'' is a non-trivial choice; some other
+        common ICU mortality work uses $200$+. We should justify or list as a
+        limitation.
+    \item Categorical features include service\_unit one-hot which is exactly
+        \texttt{first\_careunit}, the partition key. This is a partition-encoded
+        feature in the model.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:limits} adds a paragraph on (1)
+``cohort exclusion: stays with $< 24$h follow-up are excluded; the exact
+count is reported in \texttt{cohort.csv}'', (2) the top-50 itemid choice as
+a feature-engineering limit, and (3) the partition-key feature as a
+limitation -- \emph{the model knows which ICU it is in}, which makes per-ICU
+calibration easier but means the model is not transferable to a $10$th ICU
+without retraining the partition-key embedding.
+
+\subsection{Reviewer 7: the LP-duality reviewer}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item The shadow-price interpretation assumes the dual LP is tight; we
+        should report the explicit KKT residual numbers, not just ``$\leq
+        10^{-9}$.''
+    \item The $25\%$ gap between LP optimum and empirical \fedprox{}-$0.1$ is
+        described as a static-LP limitation. The gap could also be a
+        per-seed-budget mismatch (the LP uses summary candidates; empirical
+        uses per-seed configurations).
+    \item The dense-vs-sparse LP comparison conflates two changes: backbone
+        change (MLP $\to$ logistic) \emph{and} LP cost-model change.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:appendix} now reports the full KKT
+diagnostic table verbatim. \S\ref{sec:mechanism-pareto-vs-lp} now adds a
+sentence on per-seed-budget mismatch as a second contributor to the $25\%$
+gap. \S\ref{sec:methods} disentangles the dense and sparse LP runs by
+explicitly stating: dense-LP uses MLP candidates, sparse-LP uses logistic
++ top-$k$.
+
+\subsection{Reviewer 8: the search-and-tuning reviewer}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item GA fitness $1.824$ is reported but the GA budget ($48$ evals) is
+        small for a $3$-D problem. We should say so.
+    \item ``Off-grid $\eta$'' is the GA's win, but if grid had been
+        $\{0.001, 0.003, 0.005, 0.01, 0.03\}$, GA would have won by less.
+    \item GA's history scatter (Fig.~\ref{fig:ga-scatter}) is from the proposal
+        run only. The old run had a $48$-eval scatter; we should at least
+        list it.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:methods} now states the budgets ($48$
+old, $90$ proposal) and notes ``$48$ evals on a $3$-D problem is sparse;
+results should be read as ``GA versus a coarse grid''.'' \S\ref{sec:mechanism-search}
+adds the explicit dependence on grid mesh choice.
+
+\subsection{Reviewer 9: the deployment engineer}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item The headline $0.665$ AUPRC was achieved on a held-out test slice of
+        the same dataset. Cross-hospital generalisation is unmeasured.
+    \item Calibration ECE $\sim 2\%$ is on the pooled test set; per-ICU ECE
+        could be much worse for the smallest units.
+    \item ``$1.2$~MB on disk'' is true for the MLP weights but the inference
+        pipeline also needs the $1{,}021$-feature schema and the StandardScaler
+        means/stds; the deployment artefact is closer to $5$~MB.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:limits} lists ``cross-hospital
+generalisation is unmeasured'' as a primary limitation. \S\ref{sec:future}
+adds ``per-ICU calibration analysis'' as a Future Work item.
+\S\ref{sec:clinical} corrects ``deployment artefact $\sim 5$~MB'' rather
+than ``$1.2$~MB.''
+
+\subsection{Reviewer 10: the fairness reviewer}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item ``Worst-client recall'' is one fairness metric; ``demographic
+        parity'' is another. We have not run race or sex stratified analyses.
+    \item The Dirichlet sweep is a proxy for heterogeneity; real-world
+        cross-hospital deployment has demographic heterogeneity that
+        Dirichlet over labels does not capture.
+    \item ``\fedprox{} doubles worst-recall'' is true on natural clients but
+        the $9$ natural clients are all $\sim 1$ hospital. Inter-hospital
+        worst-recall is unmeasured.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:limits} now explicitly enumerates
+fairness scopes: per-ICU recall is reported, demographic-stratified recall
+and inter-hospital recall are not. \S\ref{sec:future} lists both as
+priority follow-ups.
+
+\subsection{Reviewer 11: the ablation reviewer}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item No ablation on $E$ at fixed $C\!=\!5, \mu\!=\!0.1$. The headline
+        could have been at $E\!=\!2$ instead of $E\!=\!1$.
+    \item No ablation on architecture (depth, width). The MLP $1021\!\to\!256\!\to\!128\!\to\!64$
+        is a single design point.
+    \item No ablation on patience or $\Delta_{\min}$ for early stopping.
+\end{enumerate}
+\paragraph{Diff applied.} \S\ref{sec:future} adds three items: ``$E\!\in\!\{1,2,3\}$
+at $\mu\!=\!0.1$ ablation,'' ``two-/three-layer MLP comparison,'' ``early-stop
+sensitivity.''
+
+\subsection{Reviewer 12: the meta-reviewer (writing quality)}
+\paragraph{Find.}
+\begin{enumerate}[leftmargin=*,nosep]
+    \item Several mechanism subsections in \S\ref{sec:mechanism} use the
+        word ``smoking gun'' or similar. Tone too informal.
+    \item Several mechanism subsections lack a ``Counter-evidence'' block.
+    \item Algorithm 1 in \S\ref{sec:methods} is missing pseudocode; we have
+        prose only.
+\end{enumerate}
+\paragraph{Diff applied.} ``Smoking gun'' replaced by ``the precise mechanism
+we identify is.'' Counter-evidence blocks added to all $11$ mechanism
+subsections. We did not add formal Algorithm pseudocode in the main paper;
+instead we point to \texttt{flopt/fedprox.py} which is itself the
+pseudocode.

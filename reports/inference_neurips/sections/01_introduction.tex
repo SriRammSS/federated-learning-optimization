@@ -1,0 +1,87 @@
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{The clinical question}
+Twenty-four-hour ICU mortality is the canonical risk-stratification task in
+critical-care informatics: given the first 24 hours of vitals, labs, infusions,
+outputs, procedures, and prescriptions for a newly admitted ICU patient, predict
+whether the patient will die during the hospital stay. The binary label
+(\texttt{hospital\_expire\_flag}) is recorded for every \mimic{} ICU admission
+in the file \texttt{mimiciv\_2.2/icu/icustays.csv}; the cohort we use contains
+$73{,}141$ stays drawn across $9$ ICU types
+(\texttt{outputs/full\_mimic\_iv/eda/dataset\_summary.csv}). The death rate is
+$11.4\%$, which is the single most consequential number in the entire study:
+it makes accuracy a misleading metric (a constant ``predict survived'' baseline
+scores $88.6\%$), it forces \auprc{} as the headline metric, and it forces a
+class-weighted cross-entropy loss with weights
+$w = [0.5644, 4.3847]$, ratio $7.77\!\times$
+(\texttt{outputs/full\_mimic\_iv/preprocessing/preprocessing\_metadata.json}).
+
+\subsection{The federated question}
+\mimic{} has $9$ ICU care-unit codes (\texttt{first\_careunit}). In a federated
+deployment they are $9$ different physical units that, in production, do not
+share patient-level data. Each unit has a different patient mix, different
+admission patterns, and -- crucially -- a different mortality rate that ranges
+from $1.99\%$ at \emph{Neuro Intermediate} to $16.33\%$ at \emph{Neuro SICU}, an
+$8.2\!\times$ spread in just nine units
+(\texttt{outputs/full\_mimic\_iv/eda/client\_summary.csv}, Figure~\ref{fig:client-mortality}).
+The Neuro units are also small ($504$, $255$, $440$ test stays) while
+the medical units are large ($3{,}985$ MICU, $3{,}166$ MICU/SICU). The federated
+question is therefore: \textit{can a single shared model serve $9$ ICUs whose
+data is heterogeneous in size by $15.7\!\times$ and in mortality rate by $8.2\!\times$,
+without leaking patient-level data?}
+
+\subsection{What we contribute}
+Two artefact families exist in this project:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Old run} \texttt{outputs/full\_mimic\_iv\_training/}: an MLP
+        backbone trained with a $1000$-round budget, evaluated across $10$ seeds
+        and $10$ methods (\fedavg{}, \cvar{}-$\alpha$ at five levels,
+        centralized, local-only, grid-best, GA-best).
+    \item \textbf{Proposal-alignment run} \texttt{outputs/full\_mimic\_iv\_proposal\_alignment/}:
+        an additive run that introduces \fedprox{} (4 $\mu$ values), a logistic
+        sanity backbone (4 \fedprox{} $\mu$ + 4 \cvar{} $\alpha$), an $80$-round
+        Dirichlet study with $K\!=\!30$ synthetic clients across $4$ $\beta$
+        values, a stronger DE search ($90$ evaluations vs.\ $48$), top-$k$
+        sparsity diagnostics, an LP shadow-price program rerun on dense and
+        sparse cost models, and 1D/2D loss-landscape interpolation. None of the
+        original-run outputs are overwritten; the proposal-alignment artefacts
+        are written to a separate root.
+\end{itemize}
+This report is the inference layer over both. We do five things prior work
+\emph{stopped short of}:
+\begin{enumerate}[leftmargin=*,topsep=2pt]
+    \item \textbf{Mechanism-level inference} for every empirical finding. Every
+        winner is paired with a single-paragraph causal explanation that names
+        the gradient, optimization, or sampling mechanism producing it
+        (Section~\ref{sec:mechanism}).
+    \item \textbf{Convex sanity check.} Every MLP claim is reproduced on a
+        $2{,}044$-parameter logistic backbone; if a claim disappears under
+        convexity, we say so explicitly.
+    \item \textbf{Heterogeneity decomposition.} The Dirichlet $\beta$ axis
+        isolates heterogeneity from algorithm choice. The result is so dominant
+        that it changes the recommendation.
+    \item \textbf{Real reviewer rounds.} Section~\ref{sec:critique} contains $12$
+        reviewer passes with diffs: each reviewer lists at least three things
+        wrong with the prior draft and the rewritten paragraphs that fix them.
+        ``\textsc{Pass}-without-finding'' is treated as reviewer failure and the
+        round is restarted.
+    \item \textbf{Tables-turned counterfactuals} (Section~\ref{sec:tables-turned}).
+        Ten alternative rankings (worst-recall instead of accuracy, comm
+        instead of \auprc{}, std instead of mean, $\beta\!=\!0.1$ stress
+        instead of natural-clients, etc.) are run end-to-end. The central
+        thesis is the subset that survives all $10$ rotations.
+\end{enumerate}
+
+\subsection{Roadmap}
+Section~\ref{sec:background} fixes notation. Section~\ref{sec:data} walks the
+preprocessing pipeline. Section~\ref{sec:methods} states each algorithm and the
+proximal/CVaR/sparsity/LP machinery. Section~\ref{sec:results} reports the
+quantitative grid. Section~\ref{sec:mechanism} is the heart of the report --
+$11$ mechanism-level inference subsections. Sections~\ref{sec:clinical} and
+\ref{sec:optimization} are the clinical and optimization deep dives.
+Section~\ref{sec:critique} is the reviewer log with diffs.
+Section~\ref{sec:tables-turned} is the tables-turned. Section~\ref{sec:limits}
+is limitations, threats to validity, future work, and conclusion.
+Appendix~\ref{sec:appendix} carries the verbatim numerical tables and a small
+code excerpt manifest for reproducibility.

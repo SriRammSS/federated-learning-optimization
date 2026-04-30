@@ -1,0 +1,51 @@
+{
+  "dataset": "MIMIC-IV ICU mortality",
+  "mimic_out": "/Users/sriramm/Cursor_Projects/federated-learning-optimization/outputs/full_mimic_iv",
+  "rows": 73141,
+  "features": 796,
+  "clients": 9,
+  "class_names": [
+    "survived",
+    "expired"
+  ],
+  "class_weights": [
+    0.5643545001851928,
+    4.384732214228617
+  ],
+  "seeds": [
+    7,
+    11,
+    19,
+    23,
+    29,
+    31,
+    37,
+    41,
+    43,
+    47
+  ],
+  "config": {
+    "rounds": 30,
+    "max_rounds": 30,
+    "local_epochs": 1,
+    "clients_per_round": 5,
+    "lr": 0.005,
+    "batch_size": 256,
+    "seed": 7,
+    "cvar_alpha": 0.0,
+    "fairness_strength": 1.0,
+    "patience": 8,
+    "min_delta": 0.0005,
+    "early_stopping": true,
+    "monitor": "loss",
+    "class_weights": [
+      0.5643545001851928,
+      4.384732214228617
+    ],
+    "optimizer": "adam"
+  },
+  "threads": 12,
+  "platform": "macOS-26.3.1-arm64-arm-64bit",
+  "torch_version": "2.11.0",
+  "model_parameters": 110402
+}

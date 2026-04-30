@@ -5,3 +5,5 @@ cvxpy
 matplotlib
 scikit-learn
 pandas
+duckdb
+pyarrow

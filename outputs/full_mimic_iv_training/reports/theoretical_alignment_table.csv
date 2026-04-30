@@ -1,0 +1,7 @@
+component,optimization_concept
+FedAvg,local SGD and federated stochastic optimization
+Weighted cross entropy,cost-sensitive empirical risk minimization
+CVaR weighting,tail-risk and fairness-aware optimization
+LP shadow price,duality and resource-constrained optimization
+Differential evolution,global black-box hyperparameter search
+Early stopping,empirical convergence criterion

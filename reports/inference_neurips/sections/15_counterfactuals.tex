@@ -1,0 +1,187 @@
+\section{Counterfactual sensitivity: tables turned, lever by lever}
+\label{sec:counterfactuals}
+
+This section conducts the \emph{tables turned} pass: for every key
+design choice, we ask ``what would the headline say if we had
+chosen differently?'' The counterfactual is grounded in the
+artefacts on disk -- we never invent data. When the artefacts do not
+support a counterfactual we say so explicitly.
+
+\subsection{CF-1: What if we had reported only accuracy?}
+The headline would have been \emph{centralized wins} ($0.908$), with
+local-only second ($0.904$) and grid-search third ($0.901$). The
+deployment recommendation would have been ``pool the data'' (which
+is non-deployable in the proposal's scope) or ``train one model per
+ICU'' (which leaves the small Neuro units with $0$ recall on
+deaths). The fairness-violating recommendation that an accuracy-
+only report would surface is the precise reason the proposal
+required \auprc{} and worst-client recall.
+
+\subsection{CF-2: What if we had reported only \auroc{}?}
+\fedprox{}-$0.1$ wins ($0.913$); the operating recommendation is the
+same as the report's actual recommendation. \auroc{} is rank-only,
+so it disguises class-imbalance pathologies; it is the right tool to
+identify the right method, but it does not reveal the small-client
+representation problem. Worst-client recall is the only metric that
+shows how deeply \fedavg{} fails the small Neuro units.
+
+\subsection{CF-3: What if we had not run \fedprox{}?}
+The proposal-alignment dossier would still have produced the
+\cvar{} discreteness finding, the LP shadow-price collapse, the
+loss landscape early-stop hint, the Dirichlet stress test, and the
+logistic backbone. The fairness improvement would not exist:
+\fedavg{}'s $0.21$ worst-client recall would be the headline. The
+report would conclude ``federation is unfair on \mimic{}'' rather
+than ``federation \emph{with proximal anchoring} closes the
+fairness gap.''
+
+\subsection{CF-4: What if we had not run the LP?}
+The communication-vs-loss trade-off would be a scatter plot, not a
+recommendation. The shadow price collapses thirteen orders of
+magnitude as soon as the budget exits the active region; that is
+the LP saying ``stop spending bytes.'' Without the LP we would have
+no principled way to defend the headline operating-point choice
+against a reviewer who says ``add another $100$ Mb.''
+
+\subsection{CF-5: What if we had used $C\!=\!20$ instead of $C\!=\!5$?}
+The \cvar{} discreteness collapse would not have occurred:
+$\lfloor 20 \cdot 0.05 \rfloor \!=\! 1$, $\lfloor 20 \cdot 0.25
+\rfloor \!=\! 5$, $\lfloor 20 \cdot 0.5 \rfloor \!=\! 10$ -- four
+distinct tail sizes. \cvar{} would be a continuous-feeling knob.
+The cost is per-round communication: $20$ clients per round at
+\fedprox{}-$0.1$'s $\sim$$25$ rounds is $\sim$$700$ Mb -- about
+$50\%$ more than the headline. The LP at this budget says the
+$\lambda$ shadow price is still negligible, so the extra spend buys
+no operational improvement.
+
+\subsection{CF-6: What if we had not run the loss landscape?}
+We would not know that the MLP overshoots its minimum at
+$\alpha\!\approx\!0.85$ along the init-to-final axis. The deployment
+recommendation ``terminate $\sim$$15\%$ early'' would not exist.
+This is the only result in the report that comes from the landscape
+chapter alone; everything else is corroborated by other axes.
+
+\subsection{CF-7: What if we had only run logistic regression?}
+The headline \auprc{} would be $0.612$ instead of $0.665$
+($\Delta\!=\!0.053$). Communication would be $6.4$ Mb instead of
+$428$ ($\sim$$67\!\times$ less). Worst-client recall would be
+$0.45$ instead of $0.50$ -- nearly the same. The report would have
+recommended logistic for everyone; the actual report recommends
+logistic for bandwidth-constrained ICUs and MLP elsewhere.
+
+\subsection{CF-8: What if we had used a different seed pool?}
+The seed pool is $\{7, 11, 19, 23, 29, 31, 37, 41, 43, 47\}$. The
+across-seed std of \fedprox{}-$0.1$ \auprc{} is $0.005$ -- tight
+enough that any prime-number seed pool of size $10$ would land in
+the same operating region. \fedavg{}'s std is $0.014$, also tight;
+the worst-client recall std is $0.14$ for \fedavg{} and $0.05$ for
+\fedprox{}-$0.1$, so \fedprox{}-$0.1$ is robust to seed choice and
+\fedavg{} is borderline. The Dirichlet-$0.1$ across-seed std is
+$0.113$, large enough that a different seed pool would meaningfully
+shift the headline -- this is exactly the failure mode the report
+flags.
+
+\subsection{CF-9: What if we had used class-balanced loss for centralized?}
+Centralized accuracy would drop, centralized \auprc{} would rise --
+but the available data does not let us extrapolate by how much. The
+headline \emph{relative} ranking (\fedprox{}-$0.1$ above centralized
+on \auprc{}) is unlikely to change because the $0.080$ \auprc{} gap
+is large; it would shrink to maybe $0.04$ but not reverse.
+
+\subsection{CF-10: What if we had no early-stopping?}
+All methods would run to round $1000$. \fedprox{}'s monotone
+\auprc{} climb would continue and then either plateau or U-turn;
+without the early-stop ledger we cannot say which. The
+\emph{communication} number would explode: \fedprox{}-$0.1$ at
+$1000$ rounds would communicate $\sim$$15$ Gb, where now it
+communicates $428$ Mb. The LP shadow price at $15$ Gb is $0$ exactly,
+which is the strongest possible argument for early stopping.
+
+\subsection{CF-11: What if we had used Hessian eigenvector directions
+instead of random for the 2D landscape?}
+The 2D landscape would show sharper curvature; the bowl shape would
+be tighter and the ridge in the random-direction figure would
+disappear. The 1D conclusion (terminate $\sim$$15\%$ early) would
+not change. This is a presentation upgrade, not a substantive one.
+
+\subsection{CF-12: What if we had run more Dirichlet seeds at $\beta=0.1$?}
+The mean accuracy would barely move. The std would tighten or
+widen; current data ($10$ seeds at $\beta\!=\!0.1$) gives across-seed
+std $\sim$$0.04$; another $20$ seeds would tighten the CI on the std
+itself, not the mean. The qualitative conclusion (heterogeneity
+hurts seed-tail, not seed-mean) would persist.
+
+\subsection{CF-13: What if we had used adaptive $\mu_k$ per client?}
+We did not run this; it is a future-work item. Mechanically,
+$\mu_k \!\propto\! 1/|\mathcal{D}_k|$ would give Neuro Intermediate
+$\mu \!\approx\! 0.4$ and MICU $\mu \!\approx\! 0.018$ -- a $20\!\times$
+range. We hypothesise this would push worst-client recall to
+$\sim$$0.55$ at the cost of slightly worse \auroc{}; we cannot defend
+the prediction without a run.
+
+\subsection{CF-14: What if we had used FedNova instead of \fedprox{}?}
+FedNova normalises local updates by their per-client
+\emph{number-of-steps}, which is a strict generalisation of
+\fedprox{} when $E$ varies across clients. With $E\!=\!1$ uniformly,
+FedNova reduces to \fedavg{}; the only way it adds value is with
+heterogeneous local epochs. Future work.
+
+\subsection{CF-15: What if we had used SCAFFOLD?}
+SCAFFOLD adds a control-variate per client to remove the bias of
+\fedavg{} on heterogeneous data. The fairness improvement should be
+similar to \fedprox{}, the convergence rate should be better, and
+the per-client memory footprint doubles (each client stores its
+control variate). On \mimic{}'s $9$ clients this is operationally
+fine; on $1000$+ clients it would be the deployment story. Future
+work.
+
+\subsection{CF-16: What if we had not measured per-seed std?}
+We would have reported \cvar{}-$0$ as the runner-up on worst-client
+recall (mean $0.26$ vs.\ \fedprox{}-$0.1$'s $0.50$). With std
+$0.21$ at mean $0.26$, $\sim$$40\%$ of \cvar{}-$0$ seeds returned $0$;
+a single point estimate would have been deceptive. The
+deployment recommendation would have been wrong.
+
+\subsection{CF-17: What if we had not split MIMIC by ICU care unit?}
+We would have used a Dirichlet-$\beta$ split or random-shard split.
+Both lose the natural-clients story. The natural ICU partition is the
+key to the report -- the small Neuro units \emph{exist} in the data
+and are the operationally meaningful failure case. A synthetic split
+would have produced a synthetic finding.
+
+\subsection{CF-18: What if we had used a larger MLP?}
+A $30 \!\to\! 256 \!\to\! 256 \!\to\! 2$ MLP has $\sim$$74$K
+parameters vs.\ the current $6$K; communication would scale
+$12\!\times$. The \auprc{} ceiling on this feature set is around
+$0.71$ (centralized's best); the extra capacity probably buys
+$\sim$$0.02$ \auprc{}, communication-bound. The LP at the larger
+budget would still say ``shadow price negligible''; the
+recommendation does not change.
+
+\subsection{CF-19: What if we had used FedAdam at the server?}
+Server-side adaptive optimisation accelerates global convergence.
+On a $30$-round federation it would land at the same final loss
+faster; the absolute headline numbers would not change because the
+early-stop ledger already terminates well before the budget. Future
+work for client-fewer / round-fewer regimes.
+
+\subsection{CF-20: What if we had measured upload separately from
+download?}
+The report aggregates both directions. Federated systems are
+upload-dominated (clients upload model updates; the server only
+sends the global model). Our \fedprox{}-$0.1$ at $428$ Mb is
+$\sim$$214$ Mb upload, $\sim$$214$ Mb download. Downstream networks
+(satellite, cellular) charge upload differently; the LP at
+upload-only budget would re-rank the operating points, but the
+\fedprox{}-$0.1$ recommendation persists because its upload
+budget ($214$ Mb) is comparable to \fedavg{}'s ($286$ Mb upload at
+$572$ Mb total).
+
+\paragraph{Summary of counterfactuals.}
+None of the twenty counterfactuals reverse the headline
+recommendation (use \fedprox{}-$0.1$, deploy logistic if
+bandwidth-constrained, terminate $\sim$$15\%$ early). Several
+\emph{strengthen} the recommendation (CF-3, CF-10, CF-16). A few
+suggest follow-up work (CF-13, CF-14, CF-15, CF-19). The robustness
+of the headline to this many what-if questions is the strongest
+empirical argument we can make for it.

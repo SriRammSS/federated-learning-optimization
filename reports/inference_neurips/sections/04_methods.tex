@@ -1,0 +1,182 @@
+\section{Methods}
+\label{sec:methods}
+
+This section states each algorithm we evaluate, the choices we made, and -- in
+\textbf{Why-it-was-chosen} blocks -- the mechanism we expect to see fire on
+\mimic{}'s heterogeneity. The actual firing or non-firing is the entire job
+of Section~\ref{sec:mechanism}.
+
+\subsection{\fedavg{}}
+The reference algorithm. Each round, $C \!=\! 5$ clients are sampled uniformly
+without replacement, each runs $E \!=\! 1$ local epoch with batch size $256$ and
+Adam, and the server averages the resulting weights with size weights. Code:
+\texttt{flopt/fedavg.py}.
+
+\textbf{Why-it-was-chosen.} \fedavg{} is the floor of any sensible federated
+ablation: any modification has to beat it. The implementation deliberately uses
+size weighting (not uniform), so it inherits the data imbalance directly --
+which is what we want, because we want to see that imbalance get expressed as
+a fairness failure that subsequent algorithms then repair.
+
+\subsection{\fedprox{} (\texttt{flopt/fedprox.py})}
+\fedprox{} adds a proximal term to each client's local objective:
+\[
+F_k^{\mathrm{prox}}(w; w_t) \;=\; F_k(w) \;+\; \frac{\mu}{2}\, \|w - w_t\|_2^2,
+\]
+where $w_t$ is the global model received at the start of round $t$. We sweep
+$\mu \in \{0,\,10^{-3},\,10^{-2},\,10^{-1}\}$. Aggregation is unchanged from
+\fedavg{}; the only modification is per-client local training. Code excerpt:
+\begin{lstlisting}
+prox_term = 0.0
+for n, p in model.named_parameters():
+    prox_term = prox_term + (mu / 2.0) * ((p - global_state[n]) ** 2).sum()
+loss = ce(logits, y) + prox_term
+\end{lstlisting}
+Iteration is over \texttt{named\_parameters()} rather than
+\texttt{state\_dict().items()} so buffers (running mean/var) do not appear in
+the proximal term.
+
+\textbf{Why-it-was-chosen.} On heterogeneous data, the per-client minima
+$\{w_k^*\}$ are far apart; a $E\!=\!1$ local pass already pulls each $w_{t,k}$
+toward $w_k^*$, far from the consensus, so the size-weighted average has high
+variance. The proximal term is a quadratic anchor that costs the local loss
+$O(\|w_{t,k} - w_t\|^2)$, which is exactly the quantity \fedavg{} pays for in
+the next round in lost agreement. The cost-of-disagreement is paid \emph{once},
+inside each client, instead of accumulated globally.
+
+The expected mechanism on this dataset is: (i) lower per-round drift norms in
+small Neuro units; (ii) faster convergence in number of rounds; (iii) higher
+worst-client recall, because the small units no longer get over-corrected
+toward MICU. Section~\ref{sec:mechanism-fedprox} verifies this on the actual
+drift telemetry.
+
+\subsection{\cvar{}-style aggregation reweighting}
+The \cvar{} variant we implement does not modify local training; it modifies
+\emph{aggregation}. After a round, sort selected clients by their local loss
+$\hat{F}_{k}$ (highest loss = worst client). Replace the size-weighted
+aggregator with a CVaR-$\alpha$ aggregator:
+\[
+w_{t+1} \;=\; \frac{1}{|S_t^{\alpha}|} \sum_{k \in S_t^{\alpha}} w_{t,k}^{(E)},
+\qquad S_t^{\alpha} = \{k \in S_t : \hat{F}_k \geq \mathrm{Quantile}_\alpha(\hat{F})\}.
+\]
+$\alpha \!=\! 0$ recovers uniform-over-selected; $\alpha \!=\! 1$ keeps only the
+single worst client. We sweep $\alpha \in \{0, 0.5, 0.75, 0.9, 0.95\}$.
+
+\textbf{Why-it-was-chosen.} Risk-averse statistical learning argues that
+\cvar{}-of-loss is the right object when you care about the worst customer
+(here, ICU). Under perfect selection, increasing $\alpha$ should monotonically
+improve worst-client recall at the price of accuracy.
+
+\textbf{The thing we expected, and what actually happens.} With $C\!=\!5$
+sampled clients per round, the tail set $S_t^{\alpha}$ is
+$\lfloor (1-\alpha)\!\cdot\!C \rfloor$ clients. For $\alpha \!=\! 0.9$ this is
+$\lfloor 0.5 \rfloor \!=\! 0$, and the implementation falls back to ``keep the
+single worst.'' For $\alpha \!=\! 0.95$ this is also $0$, falling back the same
+way. So \cvar{}-$0.9$, \cvar{}-$0.95$, and even \cvar{}-$0.75$ ($\lfloor 1.25
+\rfloor = 1$) end up with $1$-or-$2$ client aggregation, which is identical in
+expectation. Section~\ref{sec:mechanism-cvar} returns to this discreteness.
+
+\subsection{Centralized and local-only baselines}
+\textbf{Centralized}: pool all $54{,}853$ training rows, train the same
+TabularMLP for $50$ epochs with the same Adam, evaluate on each client's test
+fold. Provides the per-client \emph{ceiling}.
+
+\textbf{Local-only}: train a fresh model on each client's training set,
+evaluate only on that client's test fold. Aggregate by recording per-client
+metrics (no global model). Provides the per-client \emph{floor}.
+
+\textbf{Why-they-were-chosen.} Centralized is unattainable in deployment but
+sets the upper envelope for what any federated method could possibly do.
+Local-only is the literal alternative to federation if no data sharing happens.
+Their gap is the room federation has to operate in.
+
+\subsection{Hyperparameter search: grid \& differential evolution}
+We search three knobs: $E \!\in\! \{1,2,3\}$ local epochs, $C \!\in\!
+\{3,4,\dots,9\}$ clients per round, $\eta$ learning rate. For grid search we
+use the discretisation $E \!\in\! \{1,2,3\}$, $C \!\in\! \{5,10,15\}$,
+$\eta \!\in\! \{0.003,0.005,0.01\}$ -- $27$ combinations.
+
+For DE search we use \texttt{scipy.optimize.differential\_evolution} with
+\texttt{popsize}=$15$, \texttt{maxiter}=$15$, fitness $= \text{loss} + \beta_C
+\!\cdot\! \text{(comm/}10^9)$, $\beta_C = 1$, evaluating each candidate on a
+held-out evaluation subset of $30$ clients ($K\!=\!9$ for the natural-clients
+case, $K \!=\! 30$ for Dirichlet). The proposal-alignment run is at $80$ rounds
+per evaluation; the original run is at $30$. The proposal-alignment run uses
+$90$ DE evaluations; the original uses $48$.
+
+\textbf{Why-it-was-chosen.} Grid search at three levels per axis is the cheapest
+sanity baseline. DE is the cheapest stochastic search that reliably handles
+mixed integer/continuous spaces (we round $E$ and $C$ to ints inside the
+evaluator). The hypothesis is that DE will find an off-grid $\eta$ that grid
+misses; Section~\ref{sec:mechanism-search} confirms this exactly.
+
+\subsection{LP duality for communication shadow prices}
+We formulate a static policy program: choose a single configuration $(E, C,
+\eta)$ subject to a total-comm budget. Let $\mathcal{X}$ be the candidate set
+(the GA history, $48$/$90$ candidates, scored by loss and bytes). Solve
+\[
+\min_{p \in \Delta^{|\mathcal{X}|}} \;\sum_x p_x \!\cdot\! \mathrm{loss}_x
+\quad \text{s.t.} \quad \sum_x p_x \!\cdot\! \mathrm{bytes}_x \leq B,
+\]
+which is a $|\mathcal{X}|$-dimensional simplex LP with one extra inequality. The
+dual variable $\lambda$ on the budget constraint is the
+\emph{communication shadow price}: the marginal loss reduction per extra byte
+of budget. We solve at $12$ budgets log-spaced between $\sim 1.6\!\times\!10^{8}$
+and $\sim 8.7\!\times\!10^{8}$ for the dense (MLP) program, and from
+$\sim 2.6\!\times\!10^{6}$ for the sparse-aware (logistic) program.
+
+We log primal feasibility, dual feasibility, complementary slackness, and a
+stationarity residual; the full diagnostic is in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/lp/kkt\_diagnostics.csv}.
+All $24$ programs solve to optimal with KKT residuals below $10^{-9}$.
+
+\textbf{Why-it-was-chosen.} Doing this LP for the headline run answers a
+question that no individual method does: ``would another byte of communication
+have helped?'' If $\lambda$ is huge, yes -- buy more. If $\lambda \!\approx\! 0$,
+no -- spend the budget elsewhere (model size, search budget, calibration).
+On \mimic{} $\lambda$ collapses 13 orders of magnitude as soon as the budget
+exits the active region; that is the LP saying ``stop spending bytes.''
+
+\subsection{Sparsity-aware communication}
+Top-$k$ compression: at the end of each local epoch, keep only the largest
+$k\!=\!\{1, 5, 10, 25, 100\}\%$ of update entries by absolute value, zero the rest,
+upload only the survivors. We measure both the natural sparsity (fraction of
+entries that would be zero \emph{without} truncation) and the achieved
+compression ratio (sparse bytes / dense bytes). The summary is in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/lp/sparsity\_summary.csv}.
+
+\textbf{Why-it-was-chosen.} Two questions: (a) \emph{do} updates have natural
+sparsity to exploit? (b) does forced top-$k$ trade lossy compression for
+budget? Spoiler: (a) no, $95.8$--$97.7\%$ of entries are nonzero
+\emph{without} truncation; (b) yes, top-$1\%$ achieves $\sim$$49\!\times$
+compression. So the compression on \mimic{} is mechanistically lossy
+truncation, not a free natural-sparsity dividend.
+
+\subsection{Dirichlet study (synthetic non-IID stress test)}
+The natural-clients case has $K \!=\! 9$. To stress-test heterogeneity, we
+construct $K \!=\! 30$ synthetic clients by drawing label proportions from a
+$\mathrm{Dir}(\beta\!\cdot\!\mathbf{1}_2)$ for $\beta \!\in\! \{0.1, 0.5, 1.0,
+\infty\}$ ($\beta\!=\!\infty$ means uniform = pure IID). Each synthetic client
+gets approximately $|\mathcal{D}|/K$ samples drawn from the global pool with
+the assigned label distribution. We run \fedavg{}, \fedprox{}-$\mu\!=\!0.001$,
+and \cvar{}-$\alpha\!=\!0.9$ across $10$ seeds for each $\beta$.
+
+\textbf{Why-it-was-chosen.} This is the cleanest knob for heterogeneity that
+exists. By varying only $\beta$ we can read off the heterogeneity-vs-method
+slope and compare it to the within-method axes (Section~\ref{sec:mechanism-dirichlet}).
+
+\subsection{Loss-landscape interpolation}
+Following~[Li et al., 2018], we save three model weight vectors:
+$w_{\text{init}}$ (random init), $w_{\text{best}}$ (lowest validation loss
+checkpoint), $w_{\text{final}}$ (last round). For 1D, we sweep
+$w_\alpha = (1-\alpha)\, w_{\text{init}} + \alpha\, w_{\text{final}}$ over
+$\alpha \in [-0.5, 1.5]$ at $41$ points. For 2D, we sweep two random
+filter-normalized directions on a $25\!\times\!25$ grid. Validation set is
+$5{,}000$ stratified rows
+(\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/landscape/loss\_landscape\_config.json}).
+Both backbones (logistic and MLP) get the full landscape.
+
+\textbf{Why-it-was-chosen.} The landscape tells us whether the optimization
+landscape is smooth (then DE/grid search differences are explained by mesh
+density) or rough (then DE wins because grid hits non-minimum mesh points).
+Section~\ref{sec:mechanism-landscape} reads this off the figures.

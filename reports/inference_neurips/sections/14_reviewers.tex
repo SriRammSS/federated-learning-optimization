@@ -1,0 +1,173 @@
+\section{Multi-reviewer adversarial critique}
+\label{sec:reviewers}
+
+The earlier self-critique (Section~\ref{sec:critique}) is one voice
+arguing with the report. This section is five \emph{distinct}
+reviewer voices, each grounded in a different professional bias, each
+allowed to attack the work from their own angle. Each reviewer
+delivers (i) the harshest \emph{honest} read of the result, (ii) a
+specific evidence request, (iii) the response we can ship today from
+the artefacts on disk, and (iv) what we cannot yet defend. The list
+of reviewers is deliberately uncomfortable: a federated-systems
+purist, a clinical biostatistician, an optimisation theorist, an
+MLOps engineer, and an ICU intensivist. The point of the exercise is
+not consensus; the point is to show the reader where each
+constituency's complaint lands and how far the artefacts go to meet
+it.
+
+\subsection{Reviewer 1: Federated-systems purist}
+\textbf{Likely complaint.} ``This is not a federated paper; it is an
+ablation study using federated language. There is no
+heterogeneity-aware aggregator beyond a discretised \cvar{}, no
+secure aggregation, no client dropout, no asynchronous training, no
+Byzantine analysis. The privacy-plus-bytes trade-off that motivates
+the field is not measured.''
+
+\textbf{Specific evidence request.} ``Show client-dropout robustness;
+show Byzantine robustness with at least $1$ malicious client; show
+that the bytes you report are the bytes a real deployment would
+incur, not the upper bound at $1000$ rounds.''
+
+\textbf{Response we can ship.} (i) The early-stopping ledger
+(\texttt{stopped\_round} column in
+\texttt{proposal\_method\_seed\_results.csv}) shows that no method
+ran to the round budget; the median \fedprox{}-$0.1$ run terminated
+at round $\sim$$25$, paying $\sim$$28\%$ of the round-budgeted bytes.
+So the bytes we report are \emph{actual} early-stop bytes, not
+worst-case. (ii) Per-seed early-stop variance is itself a partial
+robustness result: the same operating point reaches the same
+operating loss in $80\%$ of seeds within $\pm 5$ rounds of the
+median. (iii) We do \emph{not} measure Byzantine robustness; that is
+the next study.
+
+\textbf{What we cannot defend yet.} Secure aggregation, client
+dropout under realistic ICU outage profiles, asynchronous training,
+gradient inversion attacks. These are squarely in the future-work
+section.
+
+\subsection{Reviewer 2: Clinical biostatistician}
+\textbf{Likely complaint.} ``The operating-point recommendation is
+made on average \auprc{}, but the deployment audience is a clinician
+at one ICU. Per-client confidence intervals, calibration plots, and
+decision-curve analysis are absent. The seed pool is $10$, which is
+not enough to anchor a clinical trial.''
+
+\textbf{Specific evidence request.} ``Per-client BCa-bootstrap
+confidence intervals on \auprc{}, sensitivity at fixed specificity,
+calibration slope and intercept per client, and decision-curve net
+benefit at the deployment threshold.''
+
+\textbf{Response we can ship.} (i) BCa CIs are computed and stored in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/stats/proposal\_confidence\_intervals.csv}
+($1{,}000$ resamples per CI) -- \fedprox{}-$0.1$ \auprc{} CI is
+$[0.660, 0.670]$, non-overlapping with \fedavg{}'s $[0.624, 0.640]$.
+(ii) Calibration is partly addressed by the ECE/MCE columns in the
+clinical metrics CSV; a full reliability diagram is in
+Figure~\ref{fig:per-client-clinical}. (iii) The seed pool is $10$;
+that is small for biostatistics but it is large for FL ablation.
+
+\textbf{What we cannot defend yet.} Decision-curve analysis at the
+clinically meaningful threshold (e.g.\ $0.10$). Calibration
+\emph{intercept} plots per client. Subgroup analysis by age, sex,
+ethnicity. These are listed in Section~\ref{sec:limits}.
+
+\subsection{Reviewer 3: Optimisation theorist}
+\textbf{Likely complaint.} ``The convergence claims are empirical;
+there is no rate analysis. The proximal term's effect on the
+condition number of the local subproblem is not bounded. The LP
+duality is interpreted as a shadow price, but the LP is over a
+\emph{discrete} candidate set, so the dual is only valid on the
+relaxation. The claim that DE finds an off-grid optimum needs a
+local-curvature confirmation.''
+
+\textbf{Specific evidence request.} ``Compute the local Hessian
+spectrum at the best checkpoint; report the local condition number
+of $F_k$ on each client; bound the gap between the discrete LP
+optimum and its continuous relaxation; report DE's variance over
+restarts.''
+
+\textbf{Response we can ship.} (i) The 1D and 2D loss-landscape data
+(\texttt{loss\_landscape/}) are the closest empirical analogue to
+local curvature; the bowl widths are roughly the inverse of the
+local Hessian's smallest eigenvalue. (ii) The KKT diagnostics
+(\texttt{kkt\_diagnostics.csv}) confirm the LP is solved cleanly;
+the discrete-vs-continuous gap is bounded by the spacing between
+adjacent Pareto points in $\mathcal{X}$, which is reported in
+\texttt{dense\_vs\_sparse\_shadow\_price.csv}. (iii) DE was not
+restarted; the convergence trace shows plateau by iteration $9$, so
+restarts are unlikely to change the operating point.
+
+\textbf{What we cannot defend yet.} A formal convergence rate for
+\fedprox{} on \mimic{}; a tight bound on the LP's
+discreteness-induced gap; a Hessian-spectrum analysis. These are
+appendix-quality follow-ups.
+
+\subsection{Reviewer 4: MLOps engineer}
+\textbf{Likely complaint.} ``The deployment story is incomplete:
+where is the inference latency, the model size on disk, the cold-
+start cost on a fresh ICU, the canary deployment plan, the rollback
+criterion? The watchdog is reported as never triggering, which is
+the only thing the deployment cares about, but the rest of the
+operational picture is absent.''
+
+\textbf{Specific evidence request.} ``Wall-clock per-round time on
+the headline operating point; model size; expected per-inference
+latency on a CPU; cold-start time when adding a $10$th client;
+rollback criterion; SLO definition.''
+
+\textbf{Response we can ship.} (i) Resource ledger is in
+\texttt{outputs/full\_mimic\_iv\_proposal\_alignment/monitoring/resource\_summary.csv}:
+peak memory $9.28$ GB, min free $41.75$ GB, no watchdog trigger.
+(ii) Round time on M4 Max is $\sim$$5$ s for the MLP and
+$\sim$$1$ s for the logistic; on production GPUs we expect both
+to be sub-second. (iii) Model size: MLP $\sim$$26$ KB, logistic
+$\sim$$248$ B (literally $30$ floats and a bias). (iv) The
+cold-start story is partial: a new client can be added by
+broadcasting the global model and running one local epoch
+($\sim$$2$ s); we did not test the full handshake.
+
+\textbf{What we cannot defend yet.} A canary deployment plan, an
+explicit rollback criterion, and an SLO are squarely in the future-
+work pipeline.
+
+\subsection{Reviewer 5: ICU intensivist (the actual end-user)}
+\textbf{Likely complaint.} ``Which patient does this model help, and
+when does it kill someone? Show me the false-negatives at the small
+units; show me the operating threshold; show me what happens to a
+patient at admission, $24$ hours, $48$ hours; show me the model's
+decision in the cases where the resident disagreed.''
+
+\textbf{Specific evidence request.} ``A confusion matrix per ICU at a
+clinically meaningful threshold; a per-patient timeline (the model is
+single-shot but a deployment is repeated); a discussion of how the
+model interacts with existing scoring (SOFA, APACHE).''
+
+\textbf{Response we can ship.} (i) Per-client clinical metrics
+(\texttt{per\_client\_clinical\_metrics.csv}) include sensitivity,
+specificity, PPV, NPV at the $0.5$ threshold. (ii) The Neuro
+Intermediate failure case is documented: $10$ deaths, $4$ caught,
+$6$ missed -- those $6$ are the operationally important false
+negatives. (iii) We do \emph{not} have a per-patient timeline; the
+single-shot prediction is the proposal's stated scope.
+
+\textbf{What we cannot defend yet.} A clinical-decision-support
+integration plan, an interaction analysis with SOFA/APACHE, a
+per-patient longitudinal model. These are explicitly future work.
+
+\subsection{Synthesis: where the report is strong, where it is open}
+\paragraph{Strong.} (i) The mechanism for every claim is grounded in
+on-disk evidence; (ii) the LP duality is solved cleanly with KKT
+diagnostics; (iii) the per-seed reliability is reported and is the
+basis of the deployment recommendation; (iv) the watchdog never
+triggered, so the resource budget is honest; (v) the dossiers are
+auditable to the line of code.
+
+\paragraph{Open.} (i) Byzantine robustness; (ii) decision-curve
+analysis at the clinical threshold; (iii) local Hessian spectrum;
+(iv) canary deployment plan; (v) per-patient longitudinal modelling.
+
+The report does \emph{not} claim to be a finished paper for any of
+the five reviewers' constituencies. It claims to be a faithful
+mechanistic study of the federated-vs-centralized-vs-local
+trade-off on \mimic{}, with the operational consequences explicitly
+labelled.

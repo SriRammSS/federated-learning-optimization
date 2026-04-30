@@ -1,0 +1,20 @@
+{
+  "method": "fedprox_mu_0p0",
+  "seed": 29,
+  "mu": 0.0,
+  "stopped_round": 32,
+  "stopped_early": true,
+  "best_round": 17,
+  "best_loss": 0.32376858012543785,
+  "final_loss": 0.41446416411134934,
+  "final_accuracy": 0.858450690905253,
+  "final_worst_client_accuracy": 0.7867001295089722,
+  "total_comm_until_stop": 387729920,
+  "final_auroc": 0.8928141175265676,
+  "final_auprc": 0.6488356095938189,
+  "final_balanced_accuracy": 0.8121654796140869,
+  "final_sensitivity": 0.7860911270983213,
+  "final_specificity": 0.8382398321298525,
+  "final_worst_client_recall": 0.4,
+  "final_worst_client_auprc": 0.1606242211507254
+}
