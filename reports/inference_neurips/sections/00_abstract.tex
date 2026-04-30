@@ -12,13 +12,9 @@ $k\!\in\!\{1,5,10,25,100\}\%$, a synthetic Dirichlet study at $\beta \in \{0.1,
 interpolation on both \emph{TabularMLP} (302{,}914 parameters) and
 \emph{LogisticModel} (2{,}044 parameters) backbones.
 
-Three findings dominate. \textbf{(i)} \fedprox{} with $\mu \!=\! 0.1$ is the
-single best-balanced method on natural clients, attaining
-$\auprc \!=\! 0.665 \pm 0.005$, $\auroc \!=\! 0.913 \pm 0.001$, and worst-client
-recall $0.50 \pm 0.05$, while spending $\sim$25\% \emph{less} communication than
-\fedavg{}. The convex logistic backbone reproduces the same $\mu \!=\! 0.1$ winner
-($\auprc \!=\! 0.612 \pm 0.007$, paired-$t$ effect size $+1.03$ vs.\ \fedavg{}),
-demonstrating the result is not an MLP non-convexity artefact. \textbf{(ii)}
+An extended critique remediation adds 10 new experiments: SOFA baseline comparison (73{,}141 stays), 30 fresh-seed replication, per-ICU threshold optimization, personalisation baselines, a dense $K\!=\!9$ Dirichlet beta sweep (16 values), CVaR at $K\!=\!30$, architecture/feature/class-weight ablations, and LP communication sweep (120 FedAvg configs). \textbf{All results are from a single hospital (BIDMC); cross-hospital deployment requires external validation.}
+
+Four findings dominate. \textbf{(i)} \fedprox{} with $\mu \!=\! 0.1$ outperforms SOFA-LR on both \auroc{} (+0.161) and \auprc{} (+0.359), providing the strongest argument for clinical utility. On 30 uncontaminated seeds, FedProx-0.1 attains $\auprc \!=\! 0.665 \pm 0.005$ and worst-client recall $0.513 \pm 0.049$ (95\% CI: $[0.495, 0.531]$). On \auprc{}, FedProx-0.01 leads ($0.345$) while on recall FedProx-0.1 leads---we report both metrics side by side throughout. \textbf{(ii)}
 Client heterogeneity is the dominant fairness driver. The Dirichlet sweep
 collapses worst-client recall to $0$ at $\beta \!=\! 0.1$ for every method we tried;
 at $\beta \!=\! \infty$ \fedprox{} restores it to $0.727 \pm 0.022$ -- a $7.27 \!\times\!

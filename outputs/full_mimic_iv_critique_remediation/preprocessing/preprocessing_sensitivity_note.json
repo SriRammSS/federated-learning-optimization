@@ -1,0 +1,10 @@
+{
+  "note": "Only top-k=50 (current) was evaluated. Top-k in {30, 75} requires re-running the full preprocessing pipeline including chartevents aggregation, which was not executed in this run to avoid multi-hour preprocessing overhead.",
+  "completed": [
+    50
+  ],
+  "pending": [
+    30,
+    75
+  ]
+}

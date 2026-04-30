@@ -1,0 +1,8 @@
+metric,n,mean,std,ci95_lo,ci95_hi
+final_loss,30,0.2967,0.0138,0.2917,0.3016
+final_auprc,30,0.6654,0.0051,0.6636,0.6672
+final_worst_client_recall,30,0.5133,0.0507,0.4952,0.5315
+final_worst_client_auprc,30,0.3215,0.0363,0.3085,0.3345
+final_auroc,30,0.9126,0.0011,0.9122,0.913
+final_balanced_accuracy,30,0.8304,0.0019,0.8297,0.8311
+stopped_round,30,43.3,16.1547,37.5191,49.0809

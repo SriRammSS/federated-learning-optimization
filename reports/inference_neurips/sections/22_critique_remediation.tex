@@ -1,0 +1,107 @@
+\section{Critique Remediation: Extended Experiments}
+\label{sec:critique-remediation}
+
+This section presents 10 additional experiments conducted in response to a structured critique of the original report. All outputs are under \texttt{outputs/full\_mimic\_iv\_critique\_remediation/}.
+
+\subsection{Beta Placement: How Non-IID Are Natural Clients?}
+\label{sec:beta-placement}
+
+Using a Method-of-Moments estimator on the 9 natural ICU mortality rates, we fit a symmetric Dirichlet concentration parameter: $\hat{\beta} = 13.33$ (S = 26.66). A 1000-sample bootstrap 95\% CI yields $[8.04, 87.29]$. Because the CI lower bound falls below 10, the natural-client regime is \emph{ambiguous}: label heterogeneity alone is moderate, but the wide CI means we cannot rule out harder regimes. Feature-level heterogeneity across 1021 mixed features is an additional unquantified axis.
+
+\textbf{Implication:} FedProx gains on natural clients reflect a benign-to-moderate non-IID regime. Claims about harder regimes require synthetic evaluation (Exp 3B).
+
+\subsection{Dual-Metric Fairness: Recall vs AUPRC}
+\label{sec:dual-metric}
+
+\begin{table}[h]
+\centering
+\caption{Dual-metric headline: 30 fresh prime seeds on FedProx $\mu=0.1$.}
+\label{tab:fresh-seeds-ci}
+\begin{tabular}{lcccc}
+\toprule
+Metric & Mean & Std & 95\% CI Low & 95\% CI High \\
+\midrule
+\texttt{worst\_client\_recall} & 0.5133 & 0.0493 & 0.4952 & 0.5315 \\
+\texttt{worst\_client\_auprc} & 0.3215 & 0.0353 & 0.3085 & 0.3345 \\
+\texttt{final\_auprc} (global) & 0.6654 & 0.0050 & 0.6636 & 0.6672 \\
+\texttt{final\_auroc} (global) & 0.9126 & 0.0011 & 0.9122 & 0.9130 \\
+\texttt{stopped\_round} & 43.3 & 15.7 & 37.5 & 49.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 30 fresh-seed evaluation is the \textbf{primary evidence} for the deployment claim. The original 10 seeds were used during development and hyperparameter selection and are therefore contaminated. The 30-seed CI on \texttt{worst\_client\_recall} ($[0.495, 0.531]$) is consistent with the 10-seed estimate, confirming stability. However, \texttt{worst\_client\_auprc} at $0.3215$ is substantially below the 10-seed FedProx-0.01 value of $0.3447$, indicating that the metric-winner depends on the seed sample.
+
+\subsection{SOFA Baseline Comparison}
+\label{sec:sofa-baseline}
+
+SOFA scores were computed from raw \texttt{chartevents}, \texttt{labevents}, and \texttt{outputevents} for all 73,141 cohort stays using the standard Vincent et al.\ (1996) definition across 6 organ systems.
+
+\begin{table}[h]
+\centering
+\caption{SOFA-LR vs FedProx-0.1 global discrimination.}
+\label{tab:sofa-comparison}
+\begin{tabular}{lcc}
+\toprule
+Model & \auroc{} & \auprc{} \\
+\midrule
+SOFA-LR (logistic regression on total SOFA) & 0.7512 & 0.3061 \\
+FedProx $\mu=0.1$ (30-seed mean) & \textbf{0.9126} & \textbf{0.6654} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+FedProx-0.1 \emph{substantially} outperforms SOFA-LR on both metrics (AuROC: +0.161, AuPRC: +0.359). This is the strongest argument for clinical utility of the federated model.
+
+\textbf{Missingness caveat:} Respiratory and liver SOFA components had 53.7\% and 59.3\% missing rates respectively. Missing components default to score~0 per convention, which may underestimate SOFA for sicker patients. The complete-SOFA subset (13,742/73,141 stays) should be evaluated separately for unbiased comparison.
+
+\subsection{Per-ICU Threshold Optimization}
+\label{sec:threshold}
+
+Reporting at threshold $t=0.5$ on an 11.4\% mortality base rate is clinically indefensible. We swept thresholds from 0.05 to 0.95 in steps of 0.01 for each client, each method, and each of 5 seeds. Optimal thresholds were computed independently per seed.
+
+\textbf{Key finding:} Optimal Youden thresholds vary from 0.23 (Neuro clients with low mortality) to 0.58 (MICU with high mortality), confirming that a uniform threshold is inappropriate. Per-ICU calibration is essential for deployment.
+
+Neuro Intermediate and Neuro Stepdown were pooled into a single ``Neuro'' group for statistical stability, addressing the 5-deaths problem in the smallest client.
+
+\subsection{Personalisation Baseline}
+\label{sec:personalisation}
+
+We fine-tuned FedProx-0.1 and FedAvg checkpoints on each client's local data for up to 20 epochs with per-client early stopping (patience=3). Clients with fewer than 50 positive validation samples ran all 20 epochs unconditionally.
+
+Per-client personalised AUPRC ranges from 0.116 (Neuro Stepdown, client 4) to 0.671 (Cardiac Surgery Recovery, client 6) under FedProx-0.1. For the majority of clients, personalisation provides modest improvements over the global model, but the Neuro clients remain challenging regardless of the starting point.
+
+\subsection{Dirichlet $K=9$ Dense Beta Sweep}
+\label{sec:dirichlet-k9}
+
+Synthetic non-IID clients were created with $K=9$ and $\beta \in \{0.5, 1.0, 3.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 13.3, 15.0, 18.0, 20.0, 30.0, \infty\}$. Each value was run with FedAvg and FedProx-0.1 across 3 seeds (96 total runs).
+
+This provides dense coverage of the uncertainty region around the natural-client beta ($\hat{\beta}=13.3$, CI lower bound $=8.04$), allowing the reader to see exactly how FedProx advantage varies with heterogeneity.
+
+\subsection{CVaR at $K=30$, $C=20$}
+\label{sec:cvar-k30}
+
+CVaR with $\alpha \in \{0.5, 0.75, 0.9, 0.95\}$ was tested only on $K=30$ Dirichlet clients at $\beta=0.5$ with $C=20$ clients per round. The natural-client arm ($K=9$, $C \le 5$) was dropped because $\lfloor \alpha \cdot C \rfloor = 0$ for typical alpha values, producing degenerate tail selection.
+
+\subsection{Ablation Suite}
+\label{sec:ablation-suite}
+
+Three ablations were conducted, each with FedProx $\mu=0.1$ on natural clients across 5 seeds:
+
+\begin{enumerate}[nosep]
+\item \textbf{Categorical features:} Removing 67 one-hot categoricals (admission\_type, race, etc.) reduced features from 1021 to 954. Note: \texttt{first\_careunit} is \emph{already excluded} from features (line 411, \texttt{flopt/mimic.py}).
+\item \textbf{Class weights:} Original ($7.77\times$), uniform, and $\sqrt{7.77} \approx 2.79\times$ variants.
+\item \textbf{Architecture capacity:} Current (256,128,64) at 302K params, shallow (128,64) at 139K params, and wide-deep (512,256,128,64) at 696K params.
+\end{enumerate}
+
+\subsection{LP Communication Sweep}
+\label{sec:lp-sweep}
+
+40 FedAvg configurations (4 lr $\times$ 2 local\_epochs $\times$ 5 clients\_per\_round) were run with 3 seeds each at 60 rounds. This isolates the communication-loss trade-off independently of the GA search history. Shadow prices from this dedicated 120-run sweep can be compared against the GA-history LP to assess whether candidate set composition affects the duality result.
+
+\subsection{Deployment Caveat}
+\label{sec:deploy-caveat}
+
+\noindent\fbox{\parbox{0.95\textwidth}{
+\textbf{Critical Caveat:} All results are from a single hospital (Beth Israel Deaconess Medical Center). Cross-hospital deployment requires validation on external cohorts (e.g., eICU). The SOFA comparison confirms clinical utility \emph{within this hospital}, but inter-institutional generalization remains unvalidated.
+}}

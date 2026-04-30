@@ -1,0 +1,2 @@
+model,auroc,auprc,balanced_accuracy
+SOFA-LR,0.7512,0.3061,0.5284
