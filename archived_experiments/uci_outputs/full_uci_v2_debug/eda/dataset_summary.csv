@@ -1,2 +1,0 @@
-train_rows,test_rows,features,clients,classes,train_missing,test_missing,train_duplicates,feature_min,feature_max,feature_mean,feature_std
-7352,2947,561,30,6,0,0,0,-1.0,1.0,-0.5083650350570679,0.5308743715286255
