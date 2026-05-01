@@ -753,7 +753,6 @@ def _feature_correlation(df:pd.DataFrame,path:Path)->None:
 
 
 def _pca(df:pd.DataFrame,path2d:Path,path3d:Path,label_col:str)->None:
-    arr=pd.read_parquet(df.attrs.get("scaled_path","")) if False else None
     feature_cols=[c for c in df.columns if c not in {"row_id","subject_id","hadm_id","stay_id","client_id","client_name","label","split"} and pd.api.types.is_numeric_dtype(df[c])]
     x=df[feature_cols].apply(pd.to_numeric,errors="coerce").fillna(df[feature_cols].median(numeric_only=True)).fillna(0)
     sample=df.sample(min(len(df),5000),random_state=1)

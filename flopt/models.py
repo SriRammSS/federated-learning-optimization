@@ -48,8 +48,3 @@ def count_parameters(model:nn.Module)->int:
     return sum(p.numel() for p in model.parameters())
 
 
-def clone_model(model:nn.Module)->nn.Module:
-    clone=type(model)()
-    clone.load_state_dict(model.state_dict())
-    return clone
-
