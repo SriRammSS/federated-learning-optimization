@@ -13,13 +13,11 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl_cache")
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 import argparse
-import csv
 import json
 import math
 import random
 import sys
 import time
-from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 
