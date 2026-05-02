@@ -20,17 +20,6 @@ def communication_efficiency_rows(summary_rows:list[dict],threshold:float=0.90)-
             "reached_threshold":bool(acc>=threshold),
         })
     return out
-
-
-def fairness_gap_rows(rows:list[dict])->list[dict]:
-    out=[]
-    for row in rows:
-        acc=float(row.get("final_accuracy",row.get("accuracy",0)) or 0)
-        worst=float(row.get("final_worst_client_accuracy",row.get("worst_client_accuracy",0)) or 0)
-        out.append({**row,"fairness_gap":acc-worst})
-    return out
-
-
 def ablation_rows(rows:list[dict],baseline_name:str="fedavg_default")->list[dict]:
     baseline=[r for r in rows if r.get("method")==baseline_name]
     base_by_seed={r["seed"]:r for r in baseline}

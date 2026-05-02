@@ -97,21 +97,24 @@ for round_id in range(1, max_rounds + 1):
 
 \subsection{C-3: \cvar{} aggregator}
 \textbf{Source:} \texttt{flopt/aggregators.py}.\\
-\textbf{What to look for:} the floor on the tail size is exactly
-$\lfloor (1-\alpha)\,|S_t|\rfloor$, with a fallback to ``keep the
-single worst'' (which is the discreteness collapse at $C\!=\!5$).
+\textbf{What to look for:} the implementation preserves FedAvg's
+sample-size weights and boosts clients whose local loss exceeds the
+selected quantile. This is a soft CVaR-style reweighting rather than a
+hard tail selector.
 
 \begin{lstlisting}
-def cvar_aggregator(local_states, local_losses, alpha):
-    n = len(local_states)
-    if alpha <= 0.0:
-        return np.full(n, 1.0 / n)
-    k = max(1, int(np.floor((1.0 - alpha) * n)))  # tail size
-    order = np.argsort(local_losses)[::-1]        # high-loss first
-    tail  = order[:k]
-    weights = np.zeros(n)
-    weights[tail] = 1.0 / k
-    return weights
+def aggregation_weights(sizes, losses, cfg):
+    weights = sizes.astype("float64") / sizes.sum()
+    if cfg.cvar_alpha <= 0:
+        return weights
+    tau = np.quantile(losses, cfg.cvar_alpha)
+    tail = np.maximum(losses - tau, 0.0)
+    if tail.sum() == 0:
+        return weights
+    weights = weights * (
+        1 + cfg.fairness_strength * tail / tail.sum()
+    )
+    return weights / weights.sum()
 \end{lstlisting}
 
 \subsection{C-4: Sparsity / top-$k$ accounting}
@@ -288,15 +291,14 @@ def ga_search(model_factory, clients, cfg_template, comm_lambda=1.0,
 \textbf{Source:} \texttt{flopt/models.py}, class
 \texttt{LogisticModel}.\\
 \textbf{What to look for:} a single linear layer with two
-output units (so the same cross-entropy loss applies as for the
-MLP); the parameter count is $30 \cdot 2 + 2 = 62$, exactly the
-size implied by the $\sim$$248$ B model footprint.
+output units in the MIMIC run (so the same cross-entropy loss applies
+as for the MLP); the feature count is injected by the experiment runner.
 
 \begin{lstlisting}
 class LogisticModel(nn.Module):
-    def __init__(self, input_dim: int = 30, num_classes: int = 2):
+    def __init__(self, features: int = 561, classes: int = 6):
         super().__init__()
-        self.linear = nn.Linear(input_dim, num_classes)
+        self.linear = nn.Linear(features, classes)
 
     def forward(self, x):
         return self.linear(x)
@@ -304,20 +306,26 @@ class LogisticModel(nn.Module):
 
 \subsection{C-11: TabularMLP}
 \textbf{Source:} \texttt{flopt/models.py}, class \texttt{TabularMLP}.\\
-\textbf{What to look for:} two hidden layers ($30 \!\to\! 64 \!\to\!
-64 \!\to\! 2$) with ReLU and dropout. Parameter count
-$30 \cdot 64 + 64 + 64 \cdot 64 + 64 + 64 \cdot 2 + 2 = 6{,}210$.
+\textbf{What to look for:} a generic feed-forward MLP whose hidden
+widths are supplied by the experiment runner. In the MIMIC run the
+hidden shape is $(256, 128, 64)$ with dropout $0.1$.
 
 \begin{lstlisting}
 class TabularMLP(nn.Module):
-    def __init__(self, input_dim=30, hidden=64, num_classes=2,
-                  dropout=0.2):
+    def __init__(self, features: int, classes: int = 2,
+                  hidden: tuple[int, ...] = (128, 64),
+                  dropout: float = 0.0):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, hidden), nn.ReLU(), nn.Dropout(dropout),
-            nn.Linear(hidden, hidden),    nn.ReLU(), nn.Dropout(dropout),
-            nn.Linear(hidden, num_classes),
-        )
+        layers = []
+        in_features = features
+        for width in hidden:
+            layers.append(nn.Linear(in_features, width))
+            layers.append(nn.ReLU())
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+            in_features = width
+        layers.append(nn.Linear(in_features, classes))
+        self.net = nn.Sequential(*layers)
     def forward(self, x):
         return self.net(x)
 \end{lstlisting}

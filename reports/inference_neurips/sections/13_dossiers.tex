@@ -41,8 +41,7 @@ geometry, so the size-weighted average is approximately a
 (MICU, MICU/SICU, CVICU) at the cost of small clients (Neuro
 Intermediate, Neuro Stepdown), expressed as low worst-client recall.
 
-\textbf{Q3. Code location.} \texttt{flopt/fedavg.py}, helpers
-\texttt{flopt/training\_helpers.py}; aggregation is in
+\textbf{Q3. Code location.} \texttt{flopt/fedavg.py}; aggregation is in
 \texttt{flopt/aggregators.py}. The only delta from textbook \fedavg{}
 is the size-weighted (rather than uniform) aggregator -- chosen because
 size weighting is the more honest baseline given the natural ICU sizes.
@@ -198,9 +197,10 @@ $\alpha$ should monotonically improve worst-client recall by making
 the global step explicitly minimise the tail.
 
 \textbf{Q3. Code location.} \texttt{flopt/aggregators.py},
-function \texttt{cvar\_aggregator}. The tail size is computed as
-$\lfloor (1-\alpha)\!\cdot\!|S_t| \rfloor$ with a fallback to
-``keep the single worst'' when the floor is zero.
+function \texttt{aggregation\_weights}. The implementation keeps the
+baseline sample-size weights and increases mass on clients whose local
+loss lies above the $\alpha$-quantile. It is a soft tail reweighting,
+not a hard tail-only selector.
 
 \textbf{Q4. Math prediction.}
 The expected size of the tail at $|S_t|\!=\!C\!=\!5$ is

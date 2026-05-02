@@ -45,23 +45,6 @@ def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tu
         if metrics["stopped_early"]:
             break
     return model,records
-
-
-def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tuple[list[dict],list[dict]]:
-    device=_device()
-    rows=[]
-    round_rows=[]
-    for idx,client in enumerate(clients):
-        model=model_factory().to(device)
-        local_cfg=cfg
-        train_client_model(model,client,local_cfg,device)
-        metrics=evaluate_all(model,[client],device)
-        cid=client.client_id if client.client_id is not None else idx
-        rows.append({"client_id":int(cid),"loss":metrics["loss"],"accuracy":metrics["accuracy"],"test_samples":len(client.x_test),"train_samples":len(client.x_train)})
-        round_rows.append({"run_type":"local_only","seed":cfg.seed,"client_id":int(cid),"loss":metrics["loss"],"accuracy":metrics["accuracy"]})
-    return rows,round_rows
-
-
 def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->None:
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)

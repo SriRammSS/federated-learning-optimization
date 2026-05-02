@@ -1,2 +1,0 @@
-"""Federated learning optimization experiments."""
-

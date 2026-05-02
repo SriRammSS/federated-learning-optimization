@@ -48,8 +48,8 @@ Two artefact families exist in this project:
         original-run outputs are overwritten; the proposal-alignment artefacts
         are written to a separate root.
 \end{itemize}
-This report is the inference layer over both. We do five things prior work
-\emph{stopped short of}:
+This report synthesizes both artefact families. It contributes five pieces of
+analysis that are useful for interpreting the experimental results:
 \begin{enumerate}[leftmargin=*,topsep=2pt]
     \item \textbf{Mechanism-level inference} for every empirical finding. Every
         winner is paired with a single-paragraph causal explanation that names
@@ -61,11 +61,10 @@ This report is the inference layer over both. We do five things prior work
     \item \textbf{Heterogeneity decomposition.} The Dirichlet $\beta$ axis
         isolates heterogeneity from algorithm choice. The result is so dominant
         that it changes the recommendation.
-    \item \textbf{Real reviewer rounds.} Section~\ref{sec:critique} contains $12$
-        reviewer passes with diffs: each reviewer lists at least three things
-        wrong with the prior draft and the rewritten paragraphs that fix them.
-        ``\textsc{Pass}-without-finding'' is treated as reviewer failure and the
-        round is restarted.
+    \item \textbf{Structured self-critique.} Section~\ref{sec:critique}
+        contains $12$ review passes with logged edits. Each pass records the
+        issues found in the previous draft and the specific revisions that
+        followed.
     \item \textbf{Tables-turned counterfactuals} (Section~\ref{sec:tables-turned}).
         Ten alternative rankings (worst-recall instead of accuracy, comm
         instead of \auprc{}, std instead of mean, $\beta\!=\!0.1$ stress
@@ -80,8 +79,8 @@ proximal/CVaR/sparsity/LP machinery. Section~\ref{sec:results} reports the
 quantitative grid. Section~\ref{sec:mechanism} is the heart of the report --
 $11$ mechanism-level inference subsections. Sections~\ref{sec:clinical} and
 \ref{sec:optimization} are the clinical and optimization deep dives.
-Section~\ref{sec:critique} is the reviewer log with diffs.
-Section~\ref{sec:tables-turned} is the tables-turned. Section~\ref{sec:limits}
+Section~\ref{sec:critique} records the self-critique and revisions.
+Section~\ref{sec:tables-turned} reports the counterfactual rankings. Section~\ref{sec:limits}
 is limitations, threats to validity, future work, and conclusion.
 Appendix~\ref{sec:appendix} carries the verbatim numerical tables and a small
 code excerpt manifest for reproducibility.

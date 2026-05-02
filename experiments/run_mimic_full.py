@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
-import pickle
 import platform
 import shutil
 import sys
@@ -20,7 +18,7 @@ from flopt.baselines import centralized_train,train_client_model
 from flopt.calibration import calibration_bins
 from flopt.config import FLConfig
 from flopt.duality import solve_policy_lp
-from flopt.fedavg import _device,evaluate_all,federated_train,predict_clients
+from flopt.fedavg import _device,federated_train,predict_clients
 from flopt.io import convergence_summary,ensure_dirs,flatten_round_records,write_csv,write_json
 from flopt.metrics import binary_clinical_scores,binary_per_client_rows,classification_rows,confusion_rows,pr_curve_rows,roc_curve_rows
 from flopt.mimic import load_mimic_iv_arrays
@@ -34,6 +32,52 @@ from flopt.stats import confidence_rows,correlation_rows,paired_tests
 ALPHAS=[0,0.5,0.75,0.9,0.95]
 SEEDS=[7,11,19,23,29,31,37,41,43,47]
 GRID=[(1,3,0.003),(1,5,0.005),(1,7,0.005),(2,5,0.003),(2,7,0.005),(1,9,0.003),(2,3,0.01),(3,5,0.003)]
+
+
+def parse_seeds(raw:str) -> list[int]:
+    return [int(seed) for seed in raw.split(",") if seed.strip()]
+
+
+def build_mlp_factory(feature_count:int):
+    def factory() -> TabularMLP:
+        return TabularMLP(feature_count,2,hidden=(256,128,64),dropout=0.1)
+
+    return factory
+
+
+def build_base_config(args,bundle,seeds:list[int])->FLConfig:
+    return FLConfig(
+        rounds=args.max_rounds,
+        max_rounds=args.max_rounds,
+        local_epochs=args.local_epochs,
+        clients_per_round=min(args.clients_per_round,len(bundle.clients)),
+        lr=args.lr,
+        batch_size=args.batch_size,
+        seed=seeds[0],
+        cvar_alpha=0.0,
+        patience=args.patience,
+        min_delta=args.min_delta,
+        early_stopping=True,
+        monitor="loss",
+        class_weights=bundle.class_weights,
+        optimizer=args.optimizer,
+    )
+
+
+def choose_best_cvar_alpha(cvar_rows:list[dict])->float:
+    summary=summarize_rows(
+        cvar_rows,
+        "method",
+        ["final_worst_client_recall","final_worst_client_auprc","final_auprc","final_loss"],
+    )
+    best=max(
+        summary,
+        key=lambda row:(
+            row.get("final_worst_client_recall_mean",0),
+            row.get("final_worst_client_auprc_mean",0),
+        ),
+    )["method"]
+    return float(str(best).replace("cvar_",""))
 
 
 def main()->None:
@@ -60,28 +104,13 @@ def main()->None:
     out=Path(args.out)
     ensure_dirs(out)
     runtime=[]
-    seeds=[int(s) for s in args.seeds.split(",") if s.strip()]
+    seeds=parse_seeds(args.seeds)
 
     with timed("load_mimic_arrays",runtime):
         bundle=load_mimic_iv_arrays(Path(args.mimic_out),seed=seeds[0])
         clients=bundle.clients
-    model_factory=lambda:TabularMLP(len(bundle.feature_names),2,hidden=(256,128,64),dropout=0.1)
-    base=FLConfig(
-        rounds=args.max_rounds,
-        max_rounds=args.max_rounds,
-        local_epochs=args.local_epochs,
-        clients_per_round=min(args.clients_per_round,len(clients)),
-        lr=args.lr,
-        batch_size=args.batch_size,
-        seed=seeds[0],
-        cvar_alpha=0.0,
-        patience=args.patience,
-        min_delta=args.min_delta,
-        early_stopping=True,
-        monitor="loss",
-        class_weights=bundle.class_weights,
-        optimizer=args.optimizer,
-    )
+    model_factory=build_mlp_factory(len(bundle.feature_names))
+    base=build_base_config(args,bundle,seeds)
     if args.debug:
         base=replace(base,max_rounds=min(args.max_rounds,30),rounds=min(args.max_rounds,30),patience=min(args.patience,8))
         args.search_rounds=min(args.search_rounds,30)
@@ -111,9 +140,7 @@ def main()->None:
             method_seed_rows.extend(rows)
             cvar_rows.extend(rows)
             cvar_models[alpha]=model
-    cvar_summary=summarize_rows(cvar_rows,"method",["final_worst_client_recall","final_worst_client_auprc","final_auprc","final_loss"])
-    best_alpha_method=max(cvar_summary,key=lambda r:(r.get("final_worst_client_recall_mean",0),r.get("final_worst_client_auprc_mean",0)))["method"]
-    best_alpha=float(str(best_alpha_method).replace("cvar_",""))
+    best_alpha=choose_best_cvar_alpha(cvar_rows)
     final_models["cvar_best"]=cvar_models[best_alpha]
 
     with timed("baselines",runtime):
