@@ -39,7 +39,7 @@ def write_csv(path:Path,rows:list[dict])->None:
 
 def flatten_round_records(records:list[dict],run_type:str,seed:int,alpha:float|None=None)->list[dict]:
     rows=[]
-    base_keys={"round","loss","accuracy","worst_client_accuracy","upload_bytes","download_bytes","selected_clients","best_loss_so_far","best_round","rounds_since_improvement","stopped_early","client_loss","client_accuracy","config","drift_client_ids","drift_update_norms","drift_cosine_to_mean","drift_distance_to_mean"}
+    base_keys={"round","loss","accuracy","worst_client_accuracy","upload_bytes","download_bytes","selected_clients","best_loss_so_far","best_round","rounds_since_improvement","stopped_early","client_loss","client_accuracy","drift_client_ids","drift_update_norms","drift_cosine_to_mean","drift_distance_to_mean"}
     for r in records:
         row={
             "run_type":run_type,
