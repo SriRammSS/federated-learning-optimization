@@ -14,7 +14,7 @@ from .utils import _device,_loss_fn
 from .io import write_csv, write_json
 
 
-def save_model_triplet(out_dir: Path, prefix: str, initial: nn.Module, final: nn.Module, best: nn.Module) -> None:
+def save_checkpoints(out_dir: Path, prefix: str, initial: nn.Module, final: nn.Module, best: nn.Module) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     torch.save(initial.state_dict(), out_dir / f"{prefix}_initial_model.pt")
     torch.save(final.state_dict(), out_dir / f"{prefix}_final_model.pt")
@@ -76,7 +76,7 @@ def landscape_2d(
     return rows
 
 
-def stratified_validation_subset(clients, max_rows: int = 5000, seed: int = 7) -> tuple[np.ndarray, np.ndarray]:
+def validation_sample(clients, max_rows: int = 5000, seed: int = 7) -> tuple[np.ndarray, np.ndarray]:
     rng = np.random.default_rng(seed)
     x = np.concatenate([c.x_test for c in clients]).astype("float32")
     y = np.concatenate([c.y_test for c in clients]).astype("int64")

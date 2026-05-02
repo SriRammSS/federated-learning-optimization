@@ -6,7 +6,7 @@ import numpy as np
 from scipy import stats as scipy_stats
 
 
-def confidence_rows(rows:list[dict],group_key:str,metrics:list[str])->list[dict]:
+def confidence_intervals(rows:list[dict],group_key:str,metrics:list[str])->list[dict]:
     groups={}
     for row in rows:
         groups.setdefault(row[group_key],[]).append(row)
@@ -47,7 +47,7 @@ def paired_tests(rows:list[dict],method_key:str,seed_key:str,metrics:list[str],b
     return out
 
 
-def correlation_rows(left:list[dict],right:list[dict],key:str,left_metrics:list[str],right_metrics:list[str])->list[dict]:
+def correlations(left:list[dict],right:list[dict],key:str,left_metrics:list[str],right_metrics:list[str])->list[dict]:
     rmap={r[key]:r for r in right}
     out=[]
     for lm in left_metrics:

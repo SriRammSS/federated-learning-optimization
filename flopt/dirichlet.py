@@ -7,7 +7,7 @@ import numpy as np
 from .data import ClientData
 
 
-def make_dirichlet_clients_from_arrays(
+def dirichlet_split(
     arrays_path: Path,
     beta: float | str,
     k_clients: int,
@@ -93,7 +93,7 @@ def _partition_indices(indices: np.ndarray, labels: np.ndarray, beta: float | st
     return [np.array(p, dtype=np.int64) for p in parts]
 
 
-def partition_audit_rows(dist_rows: list[dict]) -> list[dict]:
+def partition_audit(dist_rows: list[dict]) -> list[dict]:
     groups = {}
     for row in dist_rows:
         key = (row["beta"], row["seed"], row["split"])

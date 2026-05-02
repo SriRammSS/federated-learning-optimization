@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def communication_efficiency_rows(summary_rows:list[dict],threshold:float=0.90)->list[dict]:
+def communication_efficiency(summary_rows:list[dict],threshold:float=0.90)->list[dict]:
     out=[]
     for row in summary_rows:
         comm=float(row.get("total_comm_until_stop",row.get("total_comm",0)) or 0)
@@ -22,7 +22,7 @@ def communication_efficiency_rows(summary_rows:list[dict],threshold:float=0.90)-
     return out
 
 
-def fairness_gap_rows(rows:list[dict])->list[dict]:
+def fairness_gaps(rows:list[dict])->list[dict]:
     out=[]
     for row in rows:
         acc=float(row.get("final_accuracy",row.get("accuracy",0)) or 0)
@@ -31,7 +31,7 @@ def fairness_gap_rows(rows:list[dict])->list[dict]:
     return out
 
 
-def ablation_rows(rows:list[dict],baseline_name:str="fedavg_default")->list[dict]:
+def ablation_deltas(rows:list[dict],baseline_name:str="fedavg_default")->list[dict]:
     baseline=[r for r in rows if r.get("method")==baseline_name]
     base_by_seed={r["seed"]:r for r in baseline}
     out=[]
@@ -48,7 +48,7 @@ def ablation_rows(rows:list[dict],baseline_name:str="fedavg_default")->list[dict
     return out
 
 
-def failure_mode_rows(rows:list[dict])->list[dict]:
+def failure_modes(rows:list[dict])->list[dict]:
     out=[]
     for row in rows:
         acc=float(row.get("final_accuracy",row.get("accuracy",0)) or 0)

@@ -15,7 +15,7 @@ def flatten_update(base_state: dict, local_state: dict) -> torch.Tensor:
     return torch.cat(parts) if parts else torch.empty(0)
 
 
-def update_sparsity_rows(
+def compute_sparsity(
     base_state: dict,
     local_state: dict,
     round_id: int,
@@ -54,7 +54,7 @@ def update_sparsity_rows(
     return rows
 
 
-def summarize_sparsity(rows: list[dict]) -> list[dict]:
+def sparsity_stats(rows: list[dict]) -> list[dict]:
     groups = {}
     for row in rows:
         key = (row["method"], row.get("mu"), row["topk_fraction"])
@@ -74,9 +74,9 @@ def summarize_sparsity(rows: list[dict]) -> list[dict]:
     return sorted(out, key=lambda r: (str(r["method"]), str(r["mu"]), float(r["topk_fraction"])))
 
 
-def dense_vs_sparse_lp_source(method_rows: list[dict], sparsity_rows: list[dict]) -> list[dict]:
+def lp_comparison(method_rows: list[dict], sparsity_rows: list[dict]) -> list[dict]:
     sparse_by_method = {}
-    for row in summarize_sparsity(sparsity_rows):
+    for row in sparsity_stats(sparsity_rows):
         if float(row["topk_fraction"]) == 0.1:
             sparse_by_method[(row["method"], row.get("mu"))] = row["sparse_comm_bytes_mean"]
     out = []
