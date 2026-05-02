@@ -156,9 +156,6 @@ def _darwin_swap_used_gb() -> float:
     try:
         text = subprocess.check_output(["/usr/sbin/sysctl", "-n", "vm.swapusage"], text=True)
         # Example: total = 2048.00M  used = 0.00M  free = 2048.00M
-        for part in text.split():
-            if part.endswith("M") and "used" in text:
-                pass
         marker = "used = "
         if marker in text:
             raw = text.split(marker, 1)[1].split()[0]
