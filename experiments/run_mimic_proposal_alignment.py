@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import argparse
 import csv
@@ -48,7 +47,7 @@ BETAS = [0.1, 0.5, 1.0, "infinity"]
 GRID = [(le, cpr, lr) for le in [1, 2, 3] for cpr in [5, 10, 15] for lr in [0.003, 0.005, 0.01]]
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["debug", "local", "full"], default="local")
     parser.add_argument("--out", default=str(OUT))
@@ -124,7 +123,7 @@ def main() -> None:
             watchdog.stop()
 
 
-def mode_settings(mode: str) -> dict:
+def mode_settings(mode: str):
     if mode == "debug":
         return {
             "seeds": [7],
@@ -424,7 +423,7 @@ def run_reports(out, args, method_rows, manifest, bundle):
     (out / "reports" / "proposal_alignment_report.md").write_text(report, encoding="utf-8")
 
 
-def ensure_alignment_dirs(out: Path) -> None:
+def ensure_alignment_dirs(out: Path):
     for name in ["raw", "metrics", "partitions", "lp", "search", "stats", "plots", "landscape", "monitoring", "reports", "runtime", "artifacts"]:
         (out / name).mkdir(parents=True, exist_ok=True)
 
@@ -463,7 +462,7 @@ def _plot_basic(out, all_rounds, summary, method_rows):
     write_csv(out / "plots" / "proposal_compliance_matrix.csv", proposal_checklist(out))
 
 
-def proposal_checklist(out: Path) -> list[dict]:
+def proposal_checklist(out: Path):
     items = [
         ("FedProx baseline", "FedProx non-IID baseline", out / "metrics" / "fedprox_vs_fedavg_summary.csv"),
         ("Convex logistic baseline", "Convex empirical risk control", out / "metrics" / "logreg_method_summary.csv"),
@@ -515,7 +514,7 @@ The existing MIMIC MLP experiment remains the main clinical extension. This alig
 
 def effect_size_rows(rows, baseline, metrics):
     base = {r["seed"]: r for r in rows if r.get("method") == baseline}
-    out = []
+    effects = []
     for method in sorted({r.get("method") for r in rows if r.get("method") != baseline}):
         vals = {r["seed"]: r for r in rows if r.get("method") == method}
         seeds = sorted(set(base) & set(vals))
@@ -523,16 +522,16 @@ def effect_size_rows(rows, baseline, metrics):
             diffs = [float(vals[s][metric]) - float(base[s][metric]) for s in seeds if vals[s].get(metric) not in {None, ""} and base[s].get(metric) not in {None, ""}]
             if len(diffs) >= 2:
                 arr = np.array(diffs, dtype=float)
-                out.append({"baseline": baseline, "method": method, "metric": metric, "n": len(arr), "mean_diff": float(arr.mean()), "cohens_d": float(arr.mean() / (arr.std(ddof=1) + 1e-12))})
-    return out
+                effects.append({"baseline": baseline, "method": method, "metric": metric, "n": len(arr), "mean_diff": float(arr.mean()), "cohens_d": float(arr.mean() / (arr.std(ddof=1) + 1e-12))})
+    return effects
 
 
 def flatten_lp(rows):
-    out = []
+    result = []
     for r in rows:
         kkt = r.get("kkt", {})
-        out.append({"budget": r.get("budget"), "loss": r.get("loss"), "cost": r.get("cost"), "lambda": r.get("lambda"), "status": r.get("status"), **kkt})
-    return out
+        result.append({"budget": r.get("budget"), "loss": r.get("loss"), "cost": r.get("cost"), "lambda": r.get("lambda"), "status": r.get("status"), **kkt})
+    return result
 
 
 def ga_best_history(history):
@@ -552,7 +551,7 @@ def checkpoint(stage, method, seed, status, path):
     return {"stage": stage, "method": method, "seed": seed, "status": status, "path": str(path), "timestamp": time.time()}
 
 
-def file_manifest(path: Path, description: str) -> dict:
+def file_manifest(path: Path, description: str):
     return {"path": str(path), "description": description, "exists": path.exists(), "bytes": path.stat().st_size if path.exists() else 0}
 
 
@@ -560,26 +559,26 @@ def stage_row(stage, start):
     return {"stage": stage, "seconds": time.perf_counter() - start}
 
 
-def fmt_float(v: float) -> str:
+def fmt_float(v: float):
     return str(v).replace(".", "p")
 
 
-def fmt_beta(v) -> str:
+def fmt_beta(v):
     return str(v).replace(".", "p")
 
 
-def float_beta(v) -> float:
+def float_beta(v):
     return float("inf") if str(v).lower() in {"inf", "infinity"} else float(v)
 
 
-def read_csv_dicts(path: Path) -> list[dict]:
+def read_csv_dicts(path: Path):
     if not path.exists():
         return []
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def validate_no_overwrite(old_training: Path, out: Path) -> None:
+def validate_no_overwrite(old_training: Path, out: Path):
     write_json(out / "reports" / "non_overwrite_validation.json", {
         "old_training_root": str(old_training),
         "alignment_root": str(out),

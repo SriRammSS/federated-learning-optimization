@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from copy import deepcopy
 
@@ -13,7 +12,7 @@ from .fedavg import evaluate_all
 from .utils import _device,_loss_fn,_optimizer
 
 
-def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tuple[nn.Module,list[dict]]:
+def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig):
     device=_device()
     model=deepcopy(model).to(device)
     x=np.concatenate([c.x_train for c in clients]).astype("float32")
@@ -48,7 +47,7 @@ def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tu
     return model,records
 
 
-def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tuple[list[dict],list[dict]]:
+def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig):
     device=_device()
     rows=[]
     round_rows=[]
@@ -62,7 +61,7 @@ def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tup
     return rows,round_rows
 
 
-def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->None:
+def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device):
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
     loader=DataLoader(TensorDataset(x,y),batch_size=cfg.batch_size,shuffle=True)

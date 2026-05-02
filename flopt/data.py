@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,7 +21,7 @@ class ClientData:
     client_id:int|None=None
 
 
-def load_clients(source:str="uci",data_dir:str="data",seed:int=7)->list[ClientData]:
+def load_clients(source:str="uci",data_dir:str="data",seed:int=7):
     if source=="uci":
         return load_uci_har(Path(data_dir),seed).clients
     if source=="mimic":
@@ -45,7 +44,7 @@ class UCIBundle:
     subject_test:np.ndarray
 
 
-def load_uci_har(data_dir:Path,seed:int=7)->UCIBundle:
+def load_uci_har(data_dir:Path,seed:int=7):
     root=_ensure_uci_har(data_dir)
     x_train_raw=np.loadtxt(root/"train"/"X_train.txt",dtype="float32")
     y_train=np.loadtxt(root/"train"/"y_train.txt",dtype="int64")-1
@@ -72,7 +71,7 @@ def load_uci_har(data_dir:Path,seed:int=7)->UCIBundle:
     return UCIBundle(clients,scaler,activity_names,root,x_train_raw,y_train,s_train,x_test_raw,y_test,s_test)
 
 
-def _ensure_uci_har(data_dir:Path)->Path:
+def _ensure_uci_har(data_dir):
     root=data_dir/"UCI HAR Dataset"
     if root.exists():
         return root

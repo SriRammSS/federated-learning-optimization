@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import argparse
 import json
@@ -36,7 +35,7 @@ SEEDS=[7,11,19,23,29,31,37,41,43,47]
 GRID=[(1,3,0.003),(1,5,0.005),(1,7,0.005),(2,5,0.003),(2,7,0.005),(1,9,0.003),(2,3,0.01),(3,5,0.003)]
 
 
-def main()->None:
+def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--mimic-out",default="outputs/full_mimic_iv")
     parser.add_argument("--out",default="outputs/full_mimic_iv_training")
@@ -193,7 +192,7 @@ def main()->None:
     print(f"wrote MIMIC-IV training artifacts to {out}")
 
 
-def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
+def write_metadata(out,args,bundle,base,seeds,model_factory):
     write_json(out/"run_metadata.json",{
         "dataset":"MIMIC-IV ICU mortality",
         "mimic_out":args.mimic_out,
@@ -203,7 +202,6 @@ def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
         "class_names":bundle.class_names,
         "class_weights":bundle.class_weights,
         "seeds":seeds,
-        "config":base.__dict__,
         "threads":args.threads,
         "platform":platform.platform(),
         "torch_version":torch.__version__,
@@ -211,7 +209,7 @@ def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
     })
 
 
-def copy_preprocessor(mimic_out:Path,out:Path)->None:
+def copy_preprocessor(mimic_out:Path,out:Path):
     src=mimic_out/"artifacts"/"mimic_preprocessor.pkl"
     if src.exists():
         shutil.copy2(src,out/"artifacts"/"mimic_preprocessor.pkl")
@@ -306,11 +304,11 @@ def write_drift(out,name,seed,records):
 
 
 def flatten_lp(rows):
-    out=[]
+    result=[]
     for r in rows:
         kkt=r.get("kkt",{})
-        out.append({"budget":r.get("budget"),"loss":r.get("loss"),"cost":r.get("cost"),"lambda":r.get("lambda"),"status":r.get("status"),**kkt})
-    return out
+        result.append({"budget":r.get("budget"),"loss":r.get("loss"),"cost":r.get("cost"),"lambda":r.get("lambda"),"status":r.get("status"),**kkt})
+    return result
 
 
 def run_diagnostics(out,method_seed_rows,per_client,conv):
@@ -329,16 +327,16 @@ def run_diagnostics(out,method_seed_rows,per_client,conv):
 
 
 def clinical_failure_modes(rows):
-    out=[]
+    flags=[]
     for row in rows:
         if float(row.get("final_sensitivity",1) or 0)<0.50:
-            out.append({**row,"failure_type":"low_mortality_recall","description":"Mortality sensitivity is below 0.50."})
+            flags.append({**row,"failure_type":"low_mortality_recall","description":"Mortality sensitivity is below 0.50."})
         if float(row.get("final_auprc",1) or 0)<0.20:
-            out.append({**row,"failure_type":"low_auprc","description":"AUPRC remains low for the imbalanced mortality task."})
-    return out
+            flags.append({**row,"failure_type":"low_auprc","description":"AUPRC remains low for the imbalanced mortality task."})
+    return flags
 
 
-def read_csv_dicts(path:Path)->list[dict]:
+def read_csv_dicts(path:Path):
     import csv
     with path.open(newline="",encoding="utf-8") as f:
         return list(csv.DictReader(f))

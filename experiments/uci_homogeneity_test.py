@@ -1,15 +1,3 @@
-"""
-Statistical tests for UCI HAR homogeneity across subjects (FL clients).
-
-Tests:
-  1. Chi-squared test of homogeneity on label distributions (K x C contingency)
-  2. Kruskal-Wallis H-test on top PCA components (feature distribution)
-  3. PERMANOVA on raw feature space (multivariate group centroids)
-
-Run: python experiments/uci_homogeneity_test.py
-"""
-from __future__ import annotations
-
 import sys
 from pathlib import Path
 
@@ -93,7 +81,7 @@ print(f"    H0: group centroids are indistinguishable across subjects")
 
 group_labels=np.array([np.where(np.array(subjects) == s)[0][0] for s in s_all])
 
-def pseudo_f(x: np.ndarray, labels: np.ndarray) -> float:
+def pseudo_f(x: np.ndarray, labels: np.ndarray):
     n=len(x)
     k=len(np.unique(labels))
     grand_mean=x.mean(axis=0)

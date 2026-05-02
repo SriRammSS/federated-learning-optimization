@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from collections import Counter
 
@@ -7,7 +6,7 @@ import numpy as np
 from .data import UCIBundle
 
 
-def eda_tables(bundle:UCIBundle)->dict[str,list[dict]]:
+def eda_tables(bundle:UCIBundle):
     xtr=bundle.x_train_raw
     xte=bundle.x_test_raw
     train_counts=Counter(bundle.y_train.tolist())
@@ -51,7 +50,7 @@ def eda_tables(bundle:UCIBundle)->dict[str,list[dict]]:
     }
 
 
-def noniid_stats(bundle:UCIBundle)->list[dict]:
+def noniid_stats(bundle:UCIBundle):
     rows=[]
     global_counts=np.bincount(np.concatenate([bundle.y_train,bundle.y_test]),minlength=len(bundle.activity_names)).astype(float)
     global_p=(global_counts+1e-9)/(global_counts.sum()+1e-9*len(global_counts))

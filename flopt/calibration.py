@@ -1,12 +1,11 @@
-from __future__ import annotations
 
 import numpy as np
 
 from .metrics import prediction_arrays
 
 
-def calibration_bins(pred_rows:list[dict],bins:int=10)->tuple[list[dict],dict]:
-    y_true,y_pred,conf,_=prediction_arrays(pred_rows)
+def calibration_bins(preds:list[dict],bins:int=10):
+    y_true,y_pred,conf,_=prediction_arrays(preds)
     correct=(y_true==y_pred).astype(float)
     edges=np.linspace(0,1,bins+1)
     rows=[]

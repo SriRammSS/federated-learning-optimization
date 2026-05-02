@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -47,14 +46,14 @@ class MimicBundle:
     class_weights:tuple[float,float]
 
 
-def find_mimic_root(data_dir:Path)->Path:
+def find_mimic_root(data_dir:Path):
     candidates=sorted(data_dir.glob("**/mimic-iv-2.1"))
     if not candidates:
         raise FileNotFoundError(f"mimic-iv-2.1 not found under {data_dir}")
     return candidates[0]
 
 
-def load_mimic(out_dir:Path=Path("outputs/full_mimic_iv"),seed:int=7)->MimicBundle:
+def load_mimic(out_dir:Path=Path("outputs/full_mimic_iv"),seed:int=7):
     arrays_path=out_dir/"preprocessing"/"model_arrays.npz"
     if not arrays_path.exists():
         raise FileNotFoundError(f"missing MIMIC arrays: {arrays_path}")
@@ -75,7 +74,7 @@ def load_mimic(out_dir:Path=Path("outputs/full_mimic_iv"),seed:int=7)->MimicBund
     return MimicBundle(clients,feature_names,["survived","expired"],client_names,out_dir,arrays_path,(float(weights[0]),float(weights[1])))
 
 
-def _read_client_names(out_dir:Path)->dict[int,str]:
+def _read_client_names(out_dir:Path):
     path=out_dir/"preprocessing"/"client_map.csv"
     if not path.exists():
         return {}
@@ -83,7 +82,7 @@ def _read_client_names(out_dir:Path)->dict[int,str]:
     return {int(r.client_id):str(r.client_name) for r in df.itertuples()}
 
 
-def preprocess_mimic(cfg:MimicConfig)->dict:
+def preprocess_mimic(cfg:MimicConfig):
     cfg.out.mkdir(parents=True,exist_ok=True)
     for name in ["preprocessing","eda","runtime","artifacts","plots/eda","plots/preprocessing"]:
         (cfg.out/name).mkdir(parents=True,exist_ok=True)
@@ -131,15 +130,15 @@ def _step(name:str,runtime:list[dict],fn):
     runtime.append({"stage":name,"seconds":time.perf_counter()-start})
 
 
-def _csv(root:Path,rel:str)->str:
+def _csv(root:Path,rel:str):
     return str(root/rel).replace("'","''")
 
 
-def _read(root:Path,rel:str)->str:
+def _read(root:Path,rel:str):
     return f"read_csv('{_csv(root,rel)}',header=true,all_varchar=true,ignore_errors=true)"
 
 
-def _build_cohort(con,root:Path,hours:int)->None:
+def _build_cohort(con,root:Path,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE cohort AS
         WITH icu AS (
@@ -218,7 +217,7 @@ def _build_cohort(con,root:Path,hours:int)->None:
     con.execute("CREATE OR REPLACE TABLE client_map AS SELECT DISTINCT client_id,client_name FROM cohort ORDER BY client_id")
 
 
-def _build_numeric_events(con,root:Path,name:str,rel:str,join_key:str,time_col:str,value_col:str,dict_name:str,dict_rel:str,top_n:int,hours:int)->None:
+def _build_numeric_events(con,root:Path,name:str,rel:str,join_key:str,time_col:str,value_col:str,dict_name:str,dict_rel:str,top_n:int,hours:int):
     con.execute(f"CREATE OR REPLACE TABLE {dict_name} AS SELECT * FROM {_read(root,dict_rel)}")
     join_expr=f"TRY_CAST(e.{join_key} AS BIGINT)=c.{join_key}"
     con.execute(f"""
@@ -246,7 +245,7 @@ def _build_numeric_events(con,root:Path,name:str,rel:str,join_key:str,time_col:s
     _wide_numeric(con,f"{name}_features",f"{name}_24h",f"{name}_item_counts",name)
 
 
-def _wide_numeric(con,out_table:str,event_table:str,top_table:str,prefix:str)->None:
+def _wide_numeric(con,out_table:str,event_table:str,top_table:str,prefix:str):
     itemids=[int(r[0]) for r in con.execute(f"SELECT itemid FROM {top_table} ORDER BY event_rows DESC").fetchall()]
     exprs=["COUNT(*) total_events","COUNT(DISTINCT itemid) distinct_items"]
     for itemid in itemids:
@@ -261,7 +260,7 @@ def _wide_numeric(con,out_table:str,event_table:str,top_table:str,prefix:str)->N
     con.execute(f"CREATE OR REPLACE TABLE {out_table} AS SELECT stay_id,{','.join(exprs)} FROM {event_table} GROUP BY stay_id")
 
 
-def _build_inputs(con,root:Path,top_n:int,hours:int)->None:
+def _build_inputs(con,root:Path,top_n:int,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE inputevents_24h AS
         SELECT
@@ -295,7 +294,7 @@ def _build_inputs(con,root:Path,top_n:int,hours:int)->None:
     con.execute(f"CREATE OR REPLACE TABLE inputevents_features AS SELECT stay_id,{','.join(exprs)} FROM inputevents_24h GROUP BY stay_id")
 
 
-def _build_outputs(con,root:Path,top_n:int,hours:int)->None:
+def _build_outputs(con,root:Path,top_n:int,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE outputevents_24h AS
         SELECT c.stay_id,TRY_CAST(e.itemid AS BIGINT) itemid,TRY_CAST(e.value AS DOUBLE) output_value
@@ -322,7 +321,7 @@ def _build_outputs(con,root:Path,top_n:int,hours:int)->None:
     con.execute(f"CREATE OR REPLACE TABLE outputevents_features AS SELECT stay_id,{','.join(exprs)} FROM outputevents_24h GROUP BY stay_id")
 
 
-def _build_procedure_events(con,root:Path,top_n:int,hours:int)->None:
+def _build_procedure_events(con,root:Path,top_n:int,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE procedureevents_24h AS
         SELECT c.stay_id,TRY_CAST(e.itemid AS BIGINT) itemid,TRY_CAST(e.value AS DOUBLE) procedure_value
@@ -344,7 +343,7 @@ def _build_procedure_events(con,root:Path,top_n:int,hours:int)->None:
     con.execute(f"CREATE OR REPLACE TABLE procedureevents_features AS SELECT stay_id,{','.join(exprs)} FROM procedureevents_24h GROUP BY stay_id")
 
 
-def _build_prescriptions(con,root:Path,top_n:int,hours:int)->None:
+def _build_prescriptions(con,root:Path,top_n:int,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE prescriptions_24h AS
         SELECT c.stay_id,LOWER(TRIM(e.drug)) drug,LOWER(TRIM(e.route)) route
@@ -368,7 +367,7 @@ def _build_prescriptions(con,root:Path,top_n:int,hours:int)->None:
     con.execute(f"CREATE OR REPLACE TABLE prescriptions_features AS SELECT stay_id,{','.join(exprs)} FROM prescriptions_24h GROUP BY stay_id")
 
 
-def _build_admin_counts(con,root:Path,hours:int)->None:
+def _build_admin_counts(con,root:Path,hours:int):
     con.execute(f"""
         CREATE OR REPLACE TABLE admin_features AS
         SELECT
@@ -391,7 +390,7 @@ def _build_admin_counts(con,root:Path,hours:int)->None:
     """)
 
 
-def _export_features(con,cfg:MimicConfig,root:Path)->None:
+def _export_features(con,cfg:MimicConfig,root:Path):
     feature_tables=[
         "chartevents_features","labevents_features","inputevents_features","outputevents_features",
         "procedureevents_features","prescriptions_features","admin_features",
@@ -463,7 +462,7 @@ def _export_features(con,cfg:MimicConfig,root:Path)->None:
     _write_split_summary(df,cfg.out)
 
 
-def _feature_cols_sql(con,feature_tables:list[str])->str:
+def _feature_cols_sql(con,feature_tables:list[str]):
     cols=[]
     for table in feature_tables:
         table_cols=[r[1] for r in con.execute(f"PRAGMA table_info('{table}')").fetchall()]
@@ -471,7 +470,7 @@ def _feature_cols_sql(con,feature_tables:list[str])->str:
     return ",".join(cols) if cols else "NULL no_event_features"
 
 
-def _client_splits(df:pd.DataFrame,seed:int)->np.ndarray:
+def _client_splits(df:pd.DataFrame,seed:int):
     split=np.array(["train"]*len(df),dtype=object)
     for cid,sub in df.groupby("client_id"):
         idx=sub.index.to_numpy()
@@ -482,7 +481,7 @@ def _client_splits(df:pd.DataFrame,seed:int)->np.ndarray:
     return split
 
 
-def _export_tables(con,out:Path)->None:
+def _export_tables(con,out:Path):
     for table,path in [
         ("client_map","preprocessing/client_map.csv"),
         ("chartevents_item_counts","preprocessing/chartevents_item_counts.csv"),
@@ -496,7 +495,7 @@ def _export_tables(con,out:Path)->None:
         con.execute(f"COPY (SELECT * FROM {table}) TO '{str(out/path).replace("'","''")}' (HEADER,DELIMITER ',')")
 
 
-def _write_split_summary(df:pd.DataFrame,out:Path)->None:
+def _write_split_summary(df:pd.DataFrame,out:Path):
     rows=[]
     for (client_id,client_name,split),sub in df.groupby(["client_id","client_name","split"]):
         rows.append({
@@ -510,7 +509,7 @@ def _write_split_summary(df:pd.DataFrame,out:Path)->None:
     write_csv(out/"preprocessing"/"split_summary.csv",rows)
 
 
-def _write_eda(con,cfg:MimicConfig)->None:
+def _write_eda(con,cfg:MimicConfig):
     df=pd.read_parquet(cfg.out/"preprocessing"/"feature_matrix_raw.parquet")
     write_csv(cfg.out/"eda"/"dataset_summary.csv",_dataset_summary(df,cfg))
     write_csv(cfg.out/"eda"/"client_summary.csv",_client_summary(df))
@@ -522,7 +521,7 @@ def _write_eda(con,cfg:MimicConfig)->None:
     con.execute(f"COPY (SELECT * FROM cohort ORDER BY stay_id) TO '{str(cfg.out/'preprocessing'/'cohort.csv').replace("'","''")}' (HEADER,DELIMITER ',')")
 
 
-def _dataset_summary(df:pd.DataFrame,cfg:MimicConfig)->list[dict]:
+def _dataset_summary(df:pd.DataFrame,cfg:MimicConfig):
     feature_cols=[c for c in df.columns if c not in {"row_id","subject_id","hadm_id","stay_id","client_id","client_name","label","split"}]
     return [{
         "rows":int(len(df)),
@@ -537,7 +536,7 @@ def _dataset_summary(df:pd.DataFrame,cfg:MimicConfig)->list[dict]:
     }]
 
 
-def _client_summary(df:pd.DataFrame)->list[dict]:
+def _client_summary(df:pd.DataFrame):
     rows=[]
     for (cid,name),sub in df.groupby(["client_id","client_name"]):
         rows.append({
@@ -553,14 +552,14 @@ def _client_summary(df:pd.DataFrame)->list[dict]:
     return sorted(rows,key=lambda r:r["rows"],reverse=True)
 
 
-def _label_distribution(df:pd.DataFrame)->list[dict]:
+def _label_distribution(df:pd.DataFrame):
     return [
         {"label":0,"name":"survived","count":int((df["label"]==0).sum()),"proportion":float((df["label"]==0).mean())},
         {"label":1,"name":"hospital_expire_flag","count":int((df["label"]==1).sum()),"proportion":float((df["label"]==1).mean())},
     ]
 
 
-def _missingness(df:pd.DataFrame)->list[dict]:
+def _missingness(df:pd.DataFrame):
     keep={"row_id","subject_id","hadm_id","stay_id","client_id","client_name","label","split"}
     rows=[]
     for col in [c for c in df.columns if c not in keep]:
@@ -569,7 +568,7 @@ def _missingness(df:pd.DataFrame)->list[dict]:
     return sorted(rows,key=lambda r:r["missing_rate"],reverse=True)
 
 
-def _noniid(df:pd.DataFrame)->list[dict]:
+def _noniid(df:pd.DataFrame):
     global_p=np.array([(df["label"]==0).mean(),(df["label"]==1).mean()])+1e-9
     global_p=global_p/global_p.sum()
     rows=[]
@@ -590,7 +589,7 @@ def _noniid(df:pd.DataFrame)->list[dict]:
     return sorted(rows,key=lambda r:r["js_divergence"],reverse=True)
 
 
-def _plot_eda(df:pd.DataFrame,cfg:MimicConfig,niid:list[dict])->None:
+def _plot_eda(df:pd.DataFrame,cfg:MimicConfig,niid:list[dict]):
     plot_dir=cfg.out/"plots"/"eda"
     _bar(_label_distribution(df),"name","count",plot_dir/"mortality_label_distribution.png","Mortality Label Distribution")
     _bar(_client_summary(df),"client_name","rows",plot_dir/"client_sample_counts.png","ICU Stays per Federated Client")
@@ -632,7 +631,7 @@ def _plot_eda(df:pd.DataFrame,cfg:MimicConfig,niid:list[dict])->None:
         ],"stage","count",plot_dir/"preprocessing_feature_pipeline.png","Feature Pipeline Summary")
 
 
-def _stacked_mortality_by_client(df:pd.DataFrame,path:Path)->None:
+def _stacked_mortality_by_client(df:pd.DataFrame,path:Path):
     _prep(path)
     summary=df.groupby("client_name")["label"].agg(["sum","count"]).reset_index()
     summary.columns=["client","deaths","total"]
@@ -649,7 +648,7 @@ def _stacked_mortality_by_client(df:pd.DataFrame,path:Path)->None:
     plt.close()
 
 
-def _client_sample_pie(df:pd.DataFrame,path:Path)->None:
+def _client_sample_pie(df:pd.DataFrame,path:Path):
     _prep(path)
     counts=df.groupby("client_name").size().sort_values(ascending=False)
     fig,ax=plt.subplots(figsize=(7,7))
@@ -660,7 +659,7 @@ def _client_sample_pie(df:pd.DataFrame,path:Path)->None:
     plt.close()
 
 
-def _violin_age_by_client(df:pd.DataFrame,path:Path)->None:
+def _violin_age_by_client(df:pd.DataFrame,path:Path):
     if "anchor_age" not in df.columns:
         return
     _prep(path)
@@ -677,11 +676,11 @@ def _violin_age_by_client(df:pd.DataFrame,path:Path)->None:
     plt.close()
 
 
-def _prep(path:Path)->None:
+def _prep(path:Path):
     path.parent.mkdir(parents=True,exist_ok=True)
 
 
-def _bar(rows:list[dict],x:str,y:str,path:Path,title:str)->None:
+def _bar(rows:list[dict],x:str,y:str,path:Path,title:str):
     _prep(path)
     plt.figure(figsize=(9,4))
     plt.bar([str(r[x]) for r in rows],[float(r[y]) for r in rows])
@@ -693,7 +692,7 @@ def _bar(rows:list[dict],x:str,y:str,path:Path,title:str)->None:
     plt.close()
 
 
-def _hist(values:pd.Series,path:Path,title:str,xlabel:str)->None:
+def _hist(values:pd.Series,path:Path,title:str,xlabel:str):
     _prep(path)
     plt.figure(figsize=(7,4))
     plt.hist(values,bins=30)
@@ -705,7 +704,7 @@ def _hist(values:pd.Series,path:Path,title:str,xlabel:str)->None:
     plt.close()
 
 
-def _box_by_label(df:pd.DataFrame,col:str,path:Path,title:str)->None:
+def _box_by_label(df:pd.DataFrame,col:str,path:Path,title:str):
     _prep(path)
     plt.figure(figsize=(6,4))
     data=[df.loc[df["label"]==0,col].dropna(),df.loc[df["label"]==1,col].dropna()]
@@ -717,7 +716,7 @@ def _box_by_label(df:pd.DataFrame,col:str,path:Path,title:str)->None:
     plt.close()
 
 
-def _scatter_feature(df:pd.DataFrame,x:str,y:str,path:Path,title:str,color:str)->None:
+def _scatter_feature(df:pd.DataFrame,x:str,y:str,path:Path,title:str,color:str):
     if x not in df.columns or y not in df.columns:
         return
     _prep(path)
@@ -733,7 +732,7 @@ def _scatter_feature(df:pd.DataFrame,x:str,y:str,path:Path,title:str,color:str)-
     plt.close()
 
 
-def _feature_correlation(df:pd.DataFrame,path:Path)->None:
+def _feature_correlation(df:pd.DataFrame,path:Path):
     keep={"row_id","subject_id","hadm_id","stay_id","client_id","label"}
     numeric=[c for c in df.columns if c not in keep and pd.api.types.is_numeric_dtype(df[c])]
     cols=numeric[:40]
@@ -752,7 +751,7 @@ def _feature_correlation(df:pd.DataFrame,path:Path)->None:
     plt.close()
 
 
-def _pca(df:pd.DataFrame,path2d:Path,path3d:Path,label_col:str)->None:
+def _pca(df:pd.DataFrame,path2d:Path,path3d:Path,label_col:str):
     feature_cols=[c for c in df.columns if c not in {"row_id","subject_id","hadm_id","stay_id","client_id","client_name","label","split"} and pd.api.types.is_numeric_dtype(df[c])]
     x=df[feature_cols].apply(pd.to_numeric,errors="coerce").fillna(df[feature_cols].median(numeric_only=True)).fillna(0)
     sample=df.sample(min(len(df),5000),random_state=1)

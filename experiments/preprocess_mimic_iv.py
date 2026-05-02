@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import argparse
 import sys
@@ -9,7 +8,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from flopt.mimic import MimicConfig,preprocess_mimic
 
 
-def main()->None:
+def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--data-dir",default="data")
     parser.add_argument("--out",default="outputs/full_mimic_iv")

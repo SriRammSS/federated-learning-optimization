@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from pathlib import Path
 
@@ -14,13 +13,7 @@ def dirichlet_split(
     seed: int,
     min_train: int = 10,
     min_test: int = 2,
-) -> tuple[list[ClientData], list[dict], list[dict]]:
-    """Create leakage-safe synthetic clients from MIMIC train/test arrays.
-
-    Train rows are partitioned only with train rows, and test rows only with
-    test rows. This preserves the original preprocessing split while creating
-    proposal-faithful K=30 non-IID clients.
-    """
+):
     arr = np.load(arrays_path, allow_pickle=True)
     x = arr["x"].astype("float32")
     y = arr["y"].astype("int64")
@@ -65,8 +58,7 @@ def dirichlet_split(
     return clients, map_rows, dist_rows
 
 
-def _partition_indices(indices: np.ndarray, labels: np.ndarray, beta: float | str,
-                       k_clients: int, seed: int) -> list[np.ndarray]:
+def _partition_indices(indices, labels, beta, k_clients, seed):
     rng = np.random.default_rng(seed)
     by_label = [indices[labels == lab].copy() for lab in sorted(set(labels.tolist()))]
     for idxs in by_label:
@@ -93,16 +85,16 @@ def _partition_indices(indices: np.ndarray, labels: np.ndarray, beta: float | st
     return [np.array(p, dtype=np.int64) for p in parts]
 
 
-def partition_audit(dist_rows: list[dict]) -> list[dict]:
+def partition_audit(dist_rows: list[dict]):
     groups = {}
     for row in dist_rows:
         key = (row["beta"], row["seed"], row["split"])
         groups.setdefault(key, []).append(row)
-    out = []
+    audit = []
     for (beta, seed, split), items in groups.items():
         rates = np.array([float(r["mortality_rate"]) for r in items], dtype=float)
         sizes = np.array([int(r["rows"]) for r in items], dtype=float)
-        out.append({
+        audit.append({
             "beta": beta,
             "seed": seed,
             "split": split,
@@ -115,4 +107,4 @@ def partition_audit(dist_rows: list[dict]) -> list[dict]:
             "mortality_rate_min": float(rates.min()) if len(rates) else 0.0,
             "mortality_rate_max": float(rates.max()) if len(rates) else 0.0,
         })
-    return out
+    return audit

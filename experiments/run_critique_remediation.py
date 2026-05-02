@@ -1,13 +1,3 @@
-"""MIMIC-IV Critique Remediation Runner (Plan v6).
-
-Implements experiments 3A, 1-9 from the remediation plan.
-Usage:
-    .venv/bin/python experiments/run_critique_remediation.py --mode exp3a
-    .venv/bin/python experiments/run_critique_remediation.py --mode exp1
-    .venv/bin/python experiments/run_critique_remediation.py --mode all
-"""
-from __future__ import annotations
-
 import os
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl_cache")
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -52,7 +42,7 @@ FRESH_SEEDS = [
 ]
 
 
-def _base_config(bundle) -> FLConfig:
+def _base_config(bundle):
     return FLConfig(
         rounds=80,
         max_rounds=80,
@@ -153,7 +143,7 @@ def run_beta_placement(out: Path, bundle):
 # ---------------------------------------------------------------------------
 
 def _train_and_save_checkpoint(bundle, base, model_factory, seed, mu, out_path):
-    """Train a model and save checkpoint. Returns (model, records)."""
+
     if out_path.exists():
         print(f"    Checkpoint exists: {out_path.name}")
         state = torch.load(out_path, map_location="cpu", weights_only=True)
@@ -173,7 +163,7 @@ def _train_and_save_checkpoint(bundle, base, model_factory, seed, mu, out_path):
 
 
 def _evaluate_model_on_clients(model, clients, device):
-    """Evaluate model per client, return list of per-client dicts."""
+
     from sklearn.metrics import average_precision_score, balanced_accuracy_score, confusion_matrix
     model.eval()
     rows = []
@@ -201,7 +191,7 @@ def _evaluate_model_on_clients(model, clients, device):
 
 
 def _get_predictions_for_client(model, client, device):
-    """Get per-sample predictions for threshold sweep."""
+
     model.eval()
     x = torch.tensor(client.x_test, dtype=torch.float32).to(device)
     with torch.no_grad():
@@ -1069,7 +1059,7 @@ def run_preprocessing_sensitivity(out: Path, bundle, base, mlp_factory):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _strip(c: dict) -> dict:
+def _strip(c: dict):
     return {k: v for k, v in c.items() if k not in {"run_type", "seed", "alpha", "max_rounds"}}
 
 
