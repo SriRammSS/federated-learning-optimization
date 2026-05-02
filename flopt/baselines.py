@@ -54,8 +54,7 @@ def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tup
     round_rows=[]
     for idx,client in enumerate(clients):
         model=model_factory().to(device)
-        local_cfg=cfg
-        train_client_model(model,client,local_cfg,device)
+        train_client_model(model,client,cfg,device)
         metrics=evaluate_all(model,[client],device)
         cid=client.client_id if client.client_id is not None else idx
         rows.append({"client_id":int(cid),"loss":metrics["loss"],"accuracy":metrics["accuracy"],"test_samples":len(client.x_test),"train_samples":len(client.x_train)})

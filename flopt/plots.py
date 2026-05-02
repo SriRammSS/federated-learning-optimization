@@ -32,18 +32,6 @@ def plot_convergence(records:list[dict],path:str)->None:
     plt.close()
 
 
-def plot_cvar(rows:list[dict],path:str)->None:
-    _prep(path)
-    plt.figure(figsize=(6,4))
-    for row in rows:
-        plt.scatter(row["accuracy"],row["worst_client_accuracy"])
-        plt.text(row["accuracy"],row["worst_client_accuracy"],f"alpha={row['alpha']}")
-    plt.xlabel("Average client accuracy")
-    plt.ylabel("Worst-client accuracy")
-    plt.tight_layout()
-    plt.savefig(path,dpi=160)
-    plt.close()
-
 
 def plot_shadow_price(rows:list[dict],path:str)->None:
     clean=[r for r in rows if r.get("status") in {"optimal","optimal_inaccurate"}]
@@ -56,16 +44,6 @@ def plot_shadow_price(rows:list[dict],path:str)->None:
     plt.savefig(path,dpi=160)
     plt.close()
 
-
-def plot_search_comparison(grid_rows:list[dict],ga_result:dict,path:str)->None:
-    best_grid=min(float(r["fitness"]) for r in grid_rows)
-    _prep(path)
-    plt.figure(figsize=(5,4))
-    plt.bar(["Best grid","GA"],[best_grid,float(ga_result["fitness"])])
-    plt.ylabel("Fitness")
-    plt.tight_layout()
-    plt.savefig(path,dpi=160)
-    plt.close()
 
 
 def _prep(path:str)->None:

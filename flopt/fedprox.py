@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import random
 from copy import deepcopy
-from dataclasses import asdict
 
 import numpy as np
 import torch
@@ -78,7 +77,6 @@ def fedprox_train(
             "selected_clients":selected,
             "upload_bytes":count_parameters(global_model)*4*len(selected),
             "download_bytes":count_parameters(global_model)*4*len(selected),
-            "config":asdict(cfg),
             "mu":mu,
             "best_loss_so_far":best_value,
             "best_round":best_round,

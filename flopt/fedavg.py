@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import random
 from copy import deepcopy
-from dataclasses import asdict
 
 import numpy as np
 import torch
@@ -58,7 +57,6 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
             "selected_clients":selected,
             "upload_bytes":count_parameters(global_model)*4*len(selected),
             "download_bytes":count_parameters(global_model)*4*len(selected),
-            "config":asdict(cfg),
             "best_loss_so_far":best_value,
             "best_round":best_round,
             "rounds_since_improvement":stale_rounds,
