@@ -19,7 +19,8 @@ from flopt.baselines import centralized_train,train_client_model
 from flopt.calibration import calibration_bins
 from flopt.config import FLConfig
 from flopt.duality import solve_policy_lp
-from flopt.fedavg import _device,evaluate_all,federated_train,predict_clients
+from flopt.fedavg import evaluate_all,federated_train,predict_clients
+from flopt.utils import _device
 from flopt.io import convergence_summary,ensure_dirs,flatten_round_records,write_csv,write_json
 from flopt.metrics import binary_clinical_scores,binary_per_client_rows,classification_rows,confusion_rows,pr_curve_rows,roc_curve_rows
 from flopt.mimic import load_mimic_iv_arrays

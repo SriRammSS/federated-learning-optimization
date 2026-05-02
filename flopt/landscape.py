@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .fedavg import _device, _loss_fn
+from .utils import _device,_loss_fn
 from .io import write_csv, write_json
 
 
