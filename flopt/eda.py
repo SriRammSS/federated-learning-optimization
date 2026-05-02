@@ -51,7 +51,7 @@ def eda_tables(bundle:UCIBundle)->dict[str,list[dict]]:
     }
 
 
-def noniid_rows(bundle:UCIBundle)->list[dict]:
+def noniid_stats(bundle:UCIBundle)->list[dict]:
     rows=[]
     global_counts=np.bincount(np.concatenate([bundle.y_train,bundle.y_test]),minlength=len(bundle.activity_names)).astype(float)
     global_p=(global_counts+1e-9)/(global_counts.sum()+1e-9*len(global_counts))

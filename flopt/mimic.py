@@ -54,7 +54,7 @@ def find_mimic_root(data_dir:Path)->Path:
     return candidates[0]
 
 
-def load_mimic_iv_arrays(out_dir:Path=Path("outputs/full_mimic_iv"),seed:int=7)->MimicBundle:
+def load_mimic(out_dir:Path=Path("outputs/full_mimic_iv"),seed:int=7)->MimicBundle:
     arrays_path=out_dir/"preprocessing"/"model_arrays.npz"
     if not arrays_path.exists():
         raise FileNotFoundError(f"missing MIMIC arrays: {arrays_path}")
@@ -83,7 +83,7 @@ def _read_client_names(out_dir:Path)->dict[int,str]:
     return {int(r.client_id):str(r.client_name) for r in df.itertuples()}
 
 
-def build_mimic_preprocessing(cfg:MimicConfig)->dict:
+def preprocess_mimic(cfg:MimicConfig)->dict:
     cfg.out.mkdir(parents=True,exist_ok=True)
     for name in ["preprocessing","eda","runtime","artifacts","plots/eda","plots/preprocessing"]:
         (cfg.out/name).mkdir(parents=True,exist_ok=True)

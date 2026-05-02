@@ -15,7 +15,7 @@ from .models import count_parameters
 from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
-def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_drift:bool=False)->tuple[nn.Module,list[dict]]:
+def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:bool=False)->tuple[nn.Module,list[dict]]:
     _set_seed(cfg.seed)
     device=_device()
     global_model=deepcopy(model).to(device)
@@ -39,7 +39,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
             local_sizes.append(len(clients[cid].x_train))
             local_losses.append(loss)
         weights=_aggregation_weights(np.array(local_sizes),np.array(local_losses),cfg)
-        drift=_drift_stats(base_state,local_states,selected,weights) if track_drift else {}
+        drift_stats=_drift_stats(base_state,local_states,selected,weights) if drift else {}
         _load_weighted_state(global_model,local_states,weights,device)
         metrics=evaluate_all(global_model,clients,device)
         current=float(metrics[cfg.monitor])
@@ -61,7 +61,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
             "best_round":best_round,
             "rounds_since_improvement":stale_rounds,
             "stopped_early":stopped,
-            **drift,
+            **drift_stats,
         })
         records.append(metrics)
         if stopped:
@@ -119,9 +119,17 @@ def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->
     clinical={}
     if len(y_true) and set(y_true.tolist())<= {0,1}:
         tn,fp,fn,tp=confusion_matrix(y_true,y_pred,labels=[0,1]).ravel()
+        try:
+            auroc=float(roc_auc_score(y_true,prob))
+        except ValueError:
+            auroc=0.0
+        try:
+            auprc=float(average_precision_score(y_true,prob))
+        except ValueError:
+            auprc=0.0
         clinical={
-            "auroc":_safe_metric(lambda:roc_auc_score(y_true,prob)),
-            "auprc":_safe_metric(lambda:average_precision_score(y_true,prob)),
+            "auroc":auroc,
+            "auprc":auprc,
             "balanced_accuracy":float(balanced_accuracy_score(y_true,y_pred)),
             "sensitivity":float(tp/(tp+fn)) if tp+fn else 0.0,
             "specificity":float(tn/(tn+fp)) if tn+fp else 0.0,
@@ -182,13 +190,6 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
                 **{f"prob_{j}":float(probs[i,j].cpu()) for j in range(probs.shape[1])},
             })
     return rows
-
-
-def _safe_metric(fn)->float:
-    try:
-        return float(fn())
-    except ValueError:
-        return 0.0
 
 
 def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.ndarray:

@@ -26,8 +26,8 @@ def load_clients(source:str="uci",data_dir:str="data",seed:int=7)->list[ClientDa
     if source=="uci":
         return load_uci_har(Path(data_dir),seed).clients
     if source=="mimic":
-        from .mimic import load_mimic_iv_arrays
-        return load_mimic_iv_arrays(Path(data_dir),seed).clients
+        from .mimic import load_mimic
+        return load_mimic(Path(data_dir),seed).clients
     raise ValueError(f"unknown source: {source}")
 
 

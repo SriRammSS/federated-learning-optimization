@@ -12,7 +12,7 @@ from .config import FLConfig
 from .data import ClientData
 from .fedavg import _aggregation_weights,_drift_stats,evaluate_all
 from .models import count_parameters
-from .sparsity import update_sparsity_rows
+from .sparsity import compute_sparsity
 from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
@@ -21,8 +21,8 @@ def fedprox_train(
     clients:list[ClientData],
     cfg:FLConfig,
     mu:float=0.01,
-    track_drift:bool=False,
-    track_sparsity:bool=False,
+    drift:bool=False,
+    sparsity:bool=False,
 )->tuple[nn.Module,list[dict],list[dict]]:
     """FedProx training with the same record schema as FedAvg.
 
@@ -53,14 +53,14 @@ def fedprox_train(
             local_model=deepcopy(global_model)
             loss=train_one_client_fedprox(local_model,clients[cid],cfg,device,global_ref,mu)
             state_cpu={k:v.detach().cpu() for k,v in local_model.state_dict().items()}
-            if track_sparsity:
-                sparsity_rows.extend(update_sparsity_rows(base_state,state_cpu,round_id,cid,"fedprox",cfg.seed,mu))
+            if sparsity:
+                sparsity_rows.extend(compute_sparsity(base_state,state_cpu,round_id,cid,"fedprox",cfg.seed,mu))
             local_states.append(state_cpu)
             local_sizes.append(len(clients[cid].x_train))
             local_losses.append(loss)
 
         weights=_aggregation_weights(np.array(local_sizes),np.array(local_losses),cfg)
-        drift=_drift_stats(base_state,local_states,selected,weights) if track_drift else {}
+        drift_stats=_drift_stats(base_state,local_states,selected,weights) if drift else {}
         _load_weighted_state(global_model,local_states,weights,device)
         metrics=evaluate_all(global_model,clients,device)
         current=float(metrics[cfg.monitor])
@@ -82,7 +82,7 @@ def fedprox_train(
             "best_round":best_round,
             "rounds_since_improvement":stale_rounds,
             "stopped_early":stopped,
-            **drift,
+            **drift_stats,
         })
         records.append(metrics)
         if stopped:

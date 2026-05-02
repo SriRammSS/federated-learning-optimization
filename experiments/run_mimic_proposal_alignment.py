@@ -16,26 +16,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from flopt.analysis import summarize_rows
 from flopt.config import FLConfig
-from flopt.dirichlet import make_dirichlet_clients_from_arrays, partition_audit_rows
+from flopt.dirichlet import dirichlet_split, partition_audit
 from flopt.duality import solve_policy_lp
 from flopt.fedavg import federated_train
 from flopt.utils import _device
 from flopt.fedprox import fedprox_train
-from flopt.io import convergence_summary, flatten_round_records, write_csv, write_json
+from flopt.io import convergence_summary, round_records_to_csv, write_csv, write_json
 from flopt.landscape import (
     landscape_1d,
     landscape_2d,
-    save_model_triplet,
-    stratified_validation_subset,
+    save_checkpoints,
+    validation_sample,
     write_landscape_config,
 )
-from flopt.mimic import load_mimic_iv_arrays
+from flopt.mimic import load_mimic
 from flopt.models import LogisticModel, TabularMLP, count_parameters
 from flopt.plots import bar, line_mean_std, plot_shadow_price, scatter
 from flopt.resource_watchdog import ResourceWatchdog
 from flopt.search import ga_search, grid_search
-from flopt.sparsity import dense_vs_sparse_lp_source, summarize_sparsity
-from flopt.stats import confidence_rows, paired_tests
+from flopt.sparsity import lp_comparison, sparsity_stats
+from flopt.stats import confidence_intervals, paired_tests
 
 
 OUT = Path("outputs/full_mimic_iv_proposal_alignment")
@@ -77,7 +77,7 @@ def main() -> None:
     try:
         t0 = time.perf_counter()
         watchdog.set_stage("load")
-        bundle = load_mimic_iv_arrays(Path(args.mimic_out), seed=SEEDS[0])
+        bundle = load_mimic(Path(args.mimic_out), seed=SEEDS[0])
         feature_count = len(bundle.feature_names)
         base = FLConfig(
             rounds=settings["rounds"],
@@ -186,8 +186,8 @@ def run_fedprox_natural(out, bundle, base, model_factory, settings, all_rounds, 
                 continue
             cfg = replace(base, seed=seed)
             initial = model_factory()
-            model, records, sp = fedprox_train(initial, bundle.clients, cfg, mu=mu, track_drift=True, track_sparsity=True)
-            rr = flatten_round_records(records, name, seed)
+            model, records, sp = fedprox_train(initial, bundle.clients, cfg, mu=mu, drift=True, sparsity=True)
+            rr = round_records_to_csv(records, name, seed)
             for row in rr:
                 row["method"] = name
                 row["mu"] = mu
@@ -219,8 +219,8 @@ def run_logreg_controls(out, bundle, base, model_factory, settings, all_rounds, 
             cfg = replace(base, seed=seed, cvar_alpha=alpha, optimizer="adam")
             initial = model_factory()
             initial_state = {k: v.detach().cpu().clone() for k, v in initial.state_dict().items()}
-            model, records = federated_train(initial, bundle.clients, cfg, track_drift=True)
-            rr = flatten_round_records(records, name, seed, alpha)
+            model, records = federated_train(initial, bundle.clients, cfg, drift=True)
+            rr = round_records_to_csv(records, name, seed, alpha)
             for row in rr:
                 row["method"] = name
             all_rounds.extend(rr)
@@ -231,7 +231,7 @@ def run_logreg_controls(out, bundle, base, model_factory, settings, all_rounds, 
             if not saved_triplet and alpha == 0:
                 init_model = model_factory()
                 init_model.load_state_dict(initial_state)
-                save_model_triplet(out / "landscape", "logreg", init_model, model, model)
+                save_checkpoints(out / "landscape", "logreg", init_model, model, model)
                 saved_triplet = True
             checkpoints.append(checkpoint("logreg_controls", name, seed, "done", raw_path))
             if watchdog.check("logreg_controls") == "stop":
@@ -243,8 +243,8 @@ def run_logreg_controls(out, bundle, base, model_factory, settings, all_rounds, 
                 checkpoints.append(checkpoint("logreg_controls", name, seed, "skipped_existing", raw_path))
                 continue
             cfg = replace(base, seed=seed, optimizer="adam")
-            model, records, sp = fedprox_train(model_factory(), bundle.clients, cfg, mu=mu, track_drift=True, track_sparsity=True)
-            rr = flatten_round_records(records, name, seed)
+            model, records, sp = fedprox_train(model_factory(), bundle.clients, cfg, mu=mu, drift=True, sparsity=True)
+            rr = round_records_to_csv(records, name, seed)
             for row in rr:
                 row["method"] = name
                 row["mu"] = mu
@@ -266,14 +266,14 @@ def run_dirichlet_study(out, arrays_path, base, model_factory, settings, all_rou
     all_audit = []
     for beta in settings["betas"]:
         for seed in settings["seeds"]:
-            clients, map_rows, dist_rows = make_dirichlet_clients_from_arrays(arrays_path, beta, 30, seed)
+            clients, map_rows, dist_rows = dirichlet_split(arrays_path, beta, 30, seed)
             map_path = out / "partitions" / f"dirichlet_beta_{fmt_beta(beta)}_seed_{seed}_client_map.csv"
             dist_path = out / "partitions" / f"dirichlet_beta_{fmt_beta(beta)}_seed_{seed}_label_distribution.csv"
             write_csv(map_path, map_rows)
             write_csv(dist_path, dist_rows)
             manifest.append(file_manifest(map_path, "dirichlet client map"))
             manifest.append(file_manifest(dist_path, "dirichlet label distribution"))
-            all_audit.extend(partition_audit_rows(dist_rows))
+            all_audit.extend(partition_audit(dist_rows))
             method_specs = [("fedavg", 0.0), ("fedprox", None)]
             if float_beta(beta) == 0.1:
                 method_specs.append(("cvar_0.9", 0.9))
@@ -285,10 +285,10 @@ def run_dirichlet_study(out, arrays_path, base, model_factory, settings, all_rou
                     continue
                 cfg = replace(base, seed=seed, cvar_alpha=alpha or 0.0, clients_per_round=min(10, len(clients)))
                 if method == "fedprox":
-                    model, records, _ = fedprox_train(model_factory(), clients, cfg, mu=0.01, track_drift=True)
+                    model, records, _ = fedprox_train(model_factory(), clients, cfg, mu=0.01, drift=True)
                 else:
-                    model, records = federated_train(model_factory(), clients, cfg, track_drift=True)
-                rr = flatten_round_records(records, name, seed, alpha)
+                    model, records = federated_train(model_factory(), clients, cfg, drift=True)
+                rr = round_records_to_csv(records, name, seed, alpha)
                 for row in rr:
                     row["method"] = name
                     row["beta"] = str(beta)
@@ -307,8 +307,8 @@ def run_dirichlet_study(out, arrays_path, base, model_factory, settings, all_rou
 
 def run_sparsity_lp(out, method_rows, sparsity_rows, manifest):
     write_csv(out / "raw" / "sparsity_round_updates.csv", sparsity_rows)
-    write_csv(out / "lp" / "sparsity_summary.csv", summarize_sparsity(sparsity_rows))
-    lp_source = dense_vs_sparse_lp_source(method_rows, sparsity_rows)
+    write_csv(out / "lp" / "sparsity_summary.csv", sparsity_stats(sparsity_rows))
+    lp_source = lp_comparison(method_rows, sparsity_rows)
     write_csv(out / "lp" / "dense_vs_sparse_shadow_price.csv", lp_source)
     manifest.append(file_manifest(out / "raw" / "sparsity_round_updates.csv", "sparsity raw updates"))
     if not lp_source:
@@ -361,7 +361,7 @@ def run_loss_landscapes(out, bundle, base, logreg_factory, mlp_factory, settings
     if watchdog.should_skip_optional():
         return
     watchdog.set_stage("loss_landscape")
-    x_val, y_val = stratified_validation_subset(bundle.clients, max_rows=settings["validation_rows"], seed=settings["seeds"][0])
+    x_val, y_val = validation_sample(bundle.clients, max_rows=settings["validation_rows"], seed=settings["seeds"][0])
     cfg = replace(base, seed=settings["seeds"][0])
     write_landscape_config(out / "landscape" / "loss_landscape_config.json", {
         "validation_rows": int(len(y_val)),
@@ -384,8 +384,8 @@ def _ensure_landscape_triplet(out, prefix, model_factory, clients, cfg):
     initial = model_factory()
     init_copy = model_factory()
     init_copy.load_state_dict({k: v.detach().clone() for k, v in initial.state_dict().items()})
-    final, _ = federated_train(initial, clients, cfg, track_drift=False)
-    save_model_triplet(out / "landscape", prefix, init_copy, final, final)
+    final, _ = federated_train(initial, clients, cfg, drift=False)
+    save_checkpoints(out / "landscape", prefix, init_copy, final, final)
 
 
 def run_aggregate_outputs(out, all_rounds, method_rows, manifest):
@@ -397,7 +397,7 @@ def run_aggregate_outputs(out, all_rounds, method_rows, manifest):
     write_csv(out / "metrics" / "logreg_method_summary.csv", [r for r in summary if str(r["method"]).startswith("logreg")])
     write_csv(out / "metrics" / "fedprox_vs_fedavg_summary.csv", [r for r in summary if "fedprox" in str(r["method"]) or "fedavg" in str(r["method"])])
     write_csv(out / "metrics" / "dirichlet_beta_summary.csv", [r for r in method_rows if "dirichlet_beta" in str(r["method"])])
-    write_csv(out / "stats" / "proposal_confidence_intervals.csv", confidence_rows(method_rows, "method", metrics))
+    write_csv(out / "stats" / "proposal_confidence_intervals.csv", confidence_intervals(method_rows, "method", metrics))
     write_csv(out / "stats" / "proposal_paired_tests.csv", paired_tests(method_rows, "method", "seed", metrics, "logreg_fedavg"))
     write_csv(out / "stats" / "effect_sizes.csv", effect_size_rows(method_rows, "logreg_fedavg", metrics))
     _plot_basic(out, all_rounds, summary, method_rows)

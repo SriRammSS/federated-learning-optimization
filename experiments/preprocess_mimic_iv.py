@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
-from flopt.mimic import MimicConfig,build_mimic_preprocessing
+from flopt.mimic import MimicConfig,preprocess_mimic
 
 
 def main()->None:
@@ -40,7 +40,7 @@ def main()->None:
         threads=args.threads,
         memory_limit=args.memory_limit,
     )
-    meta=build_mimic_preprocessing(cfg)
+    meta=preprocess_mimic(cfg)
     print(f"wrote MIMIC-IV preprocessing and EDA outputs to {meta['mimic_root']} -> {cfg.out}")
 
 
