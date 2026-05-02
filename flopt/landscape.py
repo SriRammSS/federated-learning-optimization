@@ -3,7 +3,7 @@ from copy import deepcopy
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -77,8 +77,8 @@ def landscape_2d(
 
 def validation_sample(clients, max_rows: int = 5000, seed: int = 7):
     rng = np.random.default_rng(seed)
-    x = np.concatenate([c.x_test for c in clients]).astype("float32")
-    y = np.concatenate([c.y_test for c in clients]).astype("int64")
+    x = np.concatenate([c.x_test for c in clients]).astype('float32')
+    y = np.concatenate([c.y_test for c in clients]).astype('int64')
     idxs = []
     per_class = max(1, max_rows // max(1, len(set(y.tolist()))))
     for label in sorted(set(y.tolist())):
@@ -175,7 +175,7 @@ def _plot_2d(rows, path, title):
         for j, x in enumerate(xs):
             mat[i, j] = lookup[(x, y)]
     plt.figure(figsize=(6, 5))
-    plt.imshow(mat, origin="lower", extent=[min(xs), max(xs), min(ys), max(ys)], aspect="auto", cmap="viridis")
+    plt.imshow(mat, origin='lower', extent=[min(xs), max(xs), min(ys), max(ys)], aspect="auto", cmap='viridis')
     plt.colorbar(label="loss")
     plt.xlabel("direction 1")
     plt.ylabel("direction 2")

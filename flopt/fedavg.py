@@ -21,7 +21,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:
     records=[]
     client_ids=list(range(len(clients)))
     max_rounds=cfg.max_rounds or cfg.rounds
-    best_value=float("inf")
+    best_value=float('inf')
     best_round=0
     stale_rounds=0
     best_state=None
@@ -192,7 +192,7 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
 
 
 def _aggregation_weights(sizes,losses,cfg):
-    weights=sizes.astype("float64")/sizes.sum()
+    weights=sizes.astype('float64')/sizes.sum()
     if cfg.cvar_alpha<=0:
         return weights
     tau=np.quantile(losses,cfg.cvar_alpha)

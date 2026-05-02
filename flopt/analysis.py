@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def communication_efficiency(summary_rows:list[dict],threshold:float=0.90):
+def communication_efficiency(summary_rows,threshold:float=0.90):
     result=[]
     for row in summary_rows:
         comm=float(row.get("total_comm_until_stop",row.get("total_comm",0)) or 0)
@@ -21,7 +21,7 @@ def communication_efficiency(summary_rows:list[dict],threshold:float=0.90):
     return result
 
 
-def fairness_gaps(rows:list[dict]):
+def fairness_gaps(rows):
     gaps=[]
     for row in rows:
         acc=float(row.get("final_accuracy",row.get("accuracy",0)) or 0)
@@ -30,7 +30,7 @@ def fairness_gaps(rows:list[dict]):
     return gaps
 
 
-def ablation_deltas(rows:list[dict],baseline_name:str="fedavg_default"):
+def ablation_deltas(rows,baseline_name:str="fedavg_default"):
     baseline=[r for r in rows if r.get("method")==baseline_name]
     base_by_seed={r["seed"]:r for r in baseline}
     deltas=[]
@@ -47,7 +47,7 @@ def ablation_deltas(rows:list[dict],baseline_name:str="fedavg_default"):
     return deltas
 
 
-def failure_modes(rows:list[dict]):
+def failure_modes(rows):
     flags=[]
     for row in rows:
         acc=float(row.get("final_accuracy",row.get("accuracy",0)) or 0)
@@ -61,13 +61,13 @@ def failure_modes(rows:list[dict]):
     return flags
 
 
-def selected_case_clients(per_client:list[dict],n:int=5):
+def selected_case_clients(per_client,n:int=5):
     rows=sorted(per_client,key=lambda r:float(r["accuracy"]))
     ids=[int(rows[0]["client_id"]),int(rows[len(rows)//2]["client_id"]),int(rows[-1]["client_id"])]
     return list(dict.fromkeys(ids[:n]))
 
 
-def summarize_rows(rows:list[dict],group_key:str,metrics:list[str]):
+def summarize_rows(rows,group_key:str,metrics):
     groups={}
     for row in rows:
         groups.setdefault(row[group_key],[]).append(row)

@@ -95,7 +95,7 @@ def sample_resources(stage: str):
 
 
 def _memory_gb():
-    if platform.system() == "Darwin":
+    if platform.system() == 'Darwin':
         return _darwin_memory_gb()
     return _linux_memory_gb()
 
@@ -103,7 +103,7 @@ def _memory_gb():
 def _linux_memory_gb():
     vals = {}
     try:
-        text = Path("/proc/meminfo").read_text(encoding="utf-8")
+        text = Path("/proc/meminfo").read_text(encoding='utf-8')
         for line in text.splitlines():
             key, raw = line.split(":", 1)
             vals[key] = float(raw.strip().split()[0]) / (1024 * 1024)
@@ -132,7 +132,7 @@ def _darwin_memory_gb():
             if ":" not in line:
                 continue
             key, raw = line.split(":", 1)
-            if not key.strip().startswith("Pages"):
+            if not key.strip().startswith('Pages'):
                 continue
             vals[key.strip()] = _parse_vm_pages(raw)
         free_pages = vals.get("Pages free", 0.0) + vals.get("Pages speculative", 0.0)
@@ -155,7 +155,7 @@ def _darwin_swap_used_gb():
     try:
         text = subprocess.check_output(["/usr/sbin/sysctl", "-n", "vm.swapusage"], text=True)
         # Example: total = 2048.00M  used = 0.00M  free = 2048.00M
-        marker = "used = "
+        marker = 'used = '
         if marker in text:
             raw = text.split(marker, 1)[1].split()[0]
             return float(raw.rstrip("M")) / 1024.0
@@ -186,7 +186,7 @@ def _process_rss_gb():
     try:
         import resource
         rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        if platform.system() == "Darwin":
+        if platform.system() == 'Darwin':
             return rss / 1e9
         return rss / (1024 * 1024)
     except Exception:

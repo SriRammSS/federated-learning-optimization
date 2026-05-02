@@ -2,10 +2,8 @@
 import numpy as np
 from sklearn.metrics import average_precision_score,balanced_accuracy_score,brier_score_loss,classification_report as _sklearn_classification_report,confusion_matrix,precision_recall_curve,precision_recall_fscore_support,roc_auc_score,roc_curve as _sklearn_roc_curve
 
-from .data import ClientData
 
-
-def prediction_arrays(preds:list[dict]):
+def prediction_arrays(preds):
     y_true=np.array([r["y_true"] for r in preds],dtype=int)
     y_pred=np.array([r["y_pred"] for r in preds],dtype=int)
     conf=np.array([r["confidence"] for r in preds],dtype=float)
@@ -13,7 +11,7 @@ def prediction_arrays(preds:list[dict]):
     return y_true,y_pred,conf,client
 
 
-def classification_report(preds:list[dict],activity_names:list[str]):
+def classification_report(preds,activity_names):
     y_true,y_pred,_,_=prediction_arrays(preds)
     report=_sklearn_classification_report(y_true,y_pred,target_names=activity_names,output_dict=True,zero_division=0)
     rows=[]
@@ -25,7 +23,7 @@ def classification_report(preds:list[dict],activity_names:list[str]):
     return rows
 
 
-def confusion_table(preds:list[dict],activity_names:list[str],normalize:bool=False):
+def confusion_table(preds,activity_names,normalize:bool=False):
     y_true,y_pred,_,_=prediction_arrays(preds)
     cm=confusion_matrix(y_true,y_pred,labels=list(range(len(activity_names))),normalize="true" if normalize else None)
     rows=[]
@@ -37,7 +35,7 @@ def confusion_table(preds:list[dict],activity_names:list[str],normalize:bool=Fal
     return rows
 
 
-def client_breakdown(preds:list[dict],clients:list[ClientData]):
+def client_breakdown(preds,clients):
     y_true,y_pred,_,client_ids=prediction_arrays(preds)
     rows=[]
     for idx,client in enumerate(clients):
@@ -55,7 +53,7 @@ def client_breakdown(preds:list[dict],clients:list[ClientData]):
     return rows
 
 
-def aggregate_scores(preds:list[dict]):
+def aggregate_scores(preds):
     y_true,y_pred,_,_=prediction_arrays(preds)
     precision,recall,f1,_=precision_recall_fscore_support(y_true,y_pred,average="macro",zero_division=0)
     w_precision,w_recall,w_f1,_=precision_recall_fscore_support(y_true,y_pred,average="weighted",zero_division=0)
@@ -70,7 +68,7 @@ def aggregate_scores(preds:list[dict]):
     }
 
 
-def binary_clinical_scores(preds:list[dict]):
+def binary_clinical_scores(preds):
     y_true,y_pred,conf,_=prediction_arrays(preds)
     prob=_positive_prob(preds)
     tn,fp,fn,tp=_binary_counts(y_true,y_pred)
@@ -100,7 +98,7 @@ def binary_clinical_scores(preds:list[dict]):
     }
 
 
-def client_scores(preds:list[dict],client_names:dict[int,str]|None=None):
+def client_scores(preds,client_names=None):
     y_true,y_pred,_,client_ids=prediction_arrays(preds)
     prob=_positive_prob(preds)
     rows=[]
@@ -113,7 +111,7 @@ def client_scores(preds:list[dict],client_names:dict[int,str]|None=None):
     return rows
 
 
-def roc_curve(preds:list[dict]):
+def roc_curve(preds):
     y_true,_,_,_=prediction_arrays(preds)
     prob=_positive_prob(preds)
     if len(set(y_true.tolist()))<2:
@@ -122,7 +120,7 @@ def roc_curve(preds:list[dict]):
     return [{"fpr":float(fpr[i]),"tpr":float(tpr[i]),"threshold":float(thr[i])} for i in range(len(fpr))]
 
 
-def pr_curve(preds:list[dict]):
+def pr_curve(preds):
     y_true,_,_,_=prediction_arrays(preds)
     prob=_positive_prob(preds)
     precision,recall,thr=precision_recall_curve(y_true,prob)
@@ -132,7 +130,7 @@ def pr_curve(preds:list[dict]):
     return rows
 
 
-def top_confusions(preds:list[dict],activity_names:list[str],limit:int=10):
+def top_confusions(preds,activity_names,limit:int=10):
     y_true,y_pred,_,_=prediction_arrays(preds)
     rows=[]
     for i,name_i in enumerate(activity_names):
@@ -145,7 +143,7 @@ def top_confusions(preds:list[dict],activity_names:list[str],limit:int=10):
     return sorted(rows,key=lambda r:r["count"],reverse=True)[:limit]
 
 
-def per_class_errors(preds:list[dict],activity_names:list[str]):
+def per_class_errors(preds,activity_names):
     y_true,y_pred,_,_=prediction_arrays(preds)
     rows=[]
     for i,name in enumerate(activity_names):
