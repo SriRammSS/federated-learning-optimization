@@ -1,11 +1,10 @@
-from __future__ import annotations
 
 import csv
 import json
 from pathlib import Path
 
 
-def ensure_dirs(root:Path)->None:
+def ensure_dirs(root:Path):
     for name in [
         "eda","raw","metrics","baselines","cvar","stats","ablations","drift","noniid",
         "calibration","case_studies","errors","efficiency","sensitivity","runtime",
@@ -20,26 +19,26 @@ def ensure_dirs(root:Path)->None:
         (root/"plots"/name).mkdir(parents=True,exist_ok=True)
 
 
-def write_json(path:Path,obj)->None:
+def write_json(path:Path,obj):
     path.parent.mkdir(parents=True,exist_ok=True)
-    path.write_text(json.dumps(obj,indent=2,default=str),encoding="utf-8")
+    path.write_text(json.dumps(obj,indent=2,default=str),encoding='utf-8')
 
 
-def write_csv(path:Path,rows:list[dict])->None:
+def write_csv(path:Path,rows):
     path.parent.mkdir(parents=True,exist_ok=True)
     if not rows:
-        path.write_text("",encoding="utf-8")
+        path.write_text("",encoding='utf-8')
         return
     keys=list(dict.fromkeys(k for row in rows for k in row))
-    with path.open("w",newline="",encoding="utf-8") as f:
+    with path.open('w',newline="",encoding='utf-8') as f:
         writer=csv.DictWriter(f,fieldnames=keys)
         writer.writeheader()
         writer.writerows(rows)
 
 
-def flatten_round_records(records:list[dict],run_type:str,seed:int,alpha:float|None=None)->list[dict]:
+def round_records_to_csv(records,run_type:str,seed:int,alpha:float|None=None):
     rows=[]
-    base_keys={"round","loss","accuracy","worst_client_accuracy","upload_bytes","download_bytes","selected_clients","best_loss_so_far","best_round","rounds_since_improvement","stopped_early","client_loss","client_accuracy","config","drift_client_ids","drift_update_norms","drift_cosine_to_mean","drift_distance_to_mean"}
+    base_keys={"round","loss","accuracy","worst_client_accuracy","upload_bytes","download_bytes","selected_clients","best_loss_so_far","best_round","rounds_since_improvement","stopped_early","client_loss","client_accuracy","drift_client_ids","drift_update_norms","drift_cosine_to_mean","drift_distance_to_mean"}
     for r in records:
         row={
             "run_type":run_type,
@@ -65,7 +64,7 @@ def flatten_round_records(records:list[dict],run_type:str,seed:int,alpha:float|N
     return rows
 
 
-def convergence_summary(records:list[dict],run_type:str,seed:int,alpha:float|None,max_rounds:int)->dict:
+def convergence_summary(records,run_type:str,seed:int,alpha:float|None,max_rounds:int):
     last=records[-1]
     best=min(records,key=lambda r:r["loss"])
     total_comm=sum(r["upload_bytes"]+r["download_bytes"] for r in records)

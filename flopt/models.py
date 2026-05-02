@@ -13,7 +13,7 @@ class HARMLP(nn.Module):
             nn.Linear(64,classes),
         )
 
-    def forward(self,x:torch.Tensor)->torch.Tensor:
+    def forward(self,x:torch.Tensor):
         return self.net(x)
 
 
@@ -31,7 +31,7 @@ class TabularMLP(nn.Module):
         layers.append(nn.Linear(in_features,classes))
         self.net=nn.Sequential(*layers)
 
-    def forward(self,x:torch.Tensor)->torch.Tensor:
+    def forward(self,x:torch.Tensor):
         return self.net(x)
 
 
@@ -40,11 +40,11 @@ class LogisticModel(nn.Module):
         super().__init__()
         self.linear=nn.Linear(features,classes)
 
-    def forward(self,x:torch.Tensor)->torch.Tensor:
+    def forward(self,x:torch.Tensor):
         return self.linear(x)
 
 
-def count_parameters(model:nn.Module)->int:
+def count_parameters(model:nn.Module):
     return sum(p.numel() for p in model.parameters())
 
 

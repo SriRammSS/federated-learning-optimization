@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import os
 import platform
@@ -30,21 +29,21 @@ class ResourceWatchdog:
         self._thread: threading.Thread | None = None
         self._stage = "idle"
 
-    def start(self) -> None:
+    def start(self):
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self._thread = threading.Thread(target=self._loop, daemon=True)
         self._thread.start()
 
-    def stop(self) -> None:
+    def stop(self):
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=5)
         self.flush()
 
-    def set_stage(self, stage: str) -> None:
+    def set_stage(self, stage: str):
         self._stage = stage
 
-    def check(self, stage: str | None = None) -> str:
+    def check(self, stage: str | None = None):
         row = sample_resources(stage or self._stage)
         self.rows.append(row)
         status = "ok"
@@ -60,10 +59,10 @@ class ResourceWatchdog:
             write_csv(self.out_dir / "oom_guard_events.csv", self.events)
         return status
 
-    def should_skip_optional(self) -> bool:
+    def should_skip_optional(self):
         return self.check() in {"pause_optional", "stop"}
 
-    def flush(self) -> None:
+    def flush(self):
         write_csv(self.out_dir / "resource_timeseries.csv", self.rows)
         write_csv(self.out_dir / "oom_guard_events.csv", self.events)
         if self.rows:
@@ -78,14 +77,14 @@ class ResourceWatchdog:
             }]
             write_csv(self.out_dir / "resource_summary.csv", summary)
 
-    def _loop(self) -> None:
+    def _loop(self):
         while not self._stop.is_set():
             self.check(self._stage)
             self.flush()
             self._stop.wait(self.interval_seconds)
 
 
-def sample_resources(stage: str) -> dict:
+def sample_resources(stage: str):
     mem = _memory_gb()
     return {
         "timestamp": time.time(),
@@ -95,16 +94,16 @@ def sample_resources(stage: str) -> dict:
     }
 
 
-def _memory_gb() -> dict:
-    if platform.system() == "Darwin":
+def _memory_gb():
+    if platform.system() == 'Darwin':
         return _darwin_memory_gb()
     return _linux_memory_gb()
 
 
-def _linux_memory_gb() -> dict:
+def _linux_memory_gb():
     vals = {}
     try:
-        text = Path("/proc/meminfo").read_text(encoding="utf-8")
+        text = Path("/proc/meminfo").read_text(encoding='utf-8')
         for line in text.splitlines():
             key, raw = line.split(":", 1)
             vals[key] = float(raw.strip().split()[0]) / (1024 * 1024)
@@ -123,7 +122,7 @@ def _linux_memory_gb() -> dict:
         return _fallback_memory_gb()
 
 
-def _darwin_memory_gb() -> dict:
+def _darwin_memory_gb():
     try:
         page_size = 16384.0
         total = int(subprocess.check_output(["/usr/sbin/sysctl", "-n", "hw.memsize"], text=True).strip()) / 1e9
@@ -133,7 +132,7 @@ def _darwin_memory_gb() -> dict:
             if ":" not in line:
                 continue
             key, raw = line.split(":", 1)
-            if not key.strip().startswith("Pages"):
+            if not key.strip().startswith('Pages'):
                 continue
             vals[key.strip()] = _parse_vm_pages(raw)
         free_pages = vals.get("Pages free", 0.0) + vals.get("Pages speculative", 0.0)
@@ -152,11 +151,11 @@ def _darwin_memory_gb() -> dict:
         return _fallback_memory_gb()
 
 
-def _darwin_swap_used_gb() -> float:
+def _darwin_swap_used_gb():
     try:
         text = subprocess.check_output(["/usr/sbin/sysctl", "-n", "vm.swapusage"], text=True)
         # Example: total = 2048.00M  used = 0.00M  free = 2048.00M
-        marker = "used = "
+        marker = 'used = '
         if marker in text:
             raw = text.split(marker, 1)[1].split()[0]
             return float(raw.rstrip("M")) / 1024.0
@@ -165,7 +164,7 @@ def _darwin_swap_used_gb() -> float:
     return 0.0
 
 
-def _darwin_pressure_free_gb(total_gb: float, fallback_free_gb: float) -> float:
+def _darwin_pressure_free_gb(total_gb, fallback_free_gb):
     try:
         text = subprocess.check_output(["/usr/bin/memory_pressure"], text=True)
         marker = "System-wide memory free percentage:"
@@ -178,23 +177,23 @@ def _darwin_pressure_free_gb(total_gb: float, fallback_free_gb: float) -> float:
     return fallback_free_gb
 
 
-def _parse_vm_pages(raw: str) -> float:
+def _parse_vm_pages(raw):
     token = raw.strip().strip(".").split()[0]
     return float(token.replace(".", ""))
 
 
-def _process_rss_gb() -> float:
+def _process_rss_gb():
     try:
         import resource
         rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        if platform.system() == "Darwin":
+        if platform.system() == 'Darwin':
             return rss / 1e9
         return rss / (1024 * 1024)
     except Exception:
         return 0.0
 
 
-def _fallback_memory_gb() -> dict:
+def _fallback_memory_gb():
     return {
         "memory_total_gb": 0.0,
         "memory_free_gb": 0.0,

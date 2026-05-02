@@ -1,13 +1,3 @@
-"""MIMIC-IV Critique Remediation Runner (Plan v6).
-
-Implements experiments 3A, 1-9 from the remediation plan.
-Usage:
-    .venv/bin/python experiments/run_critique_remediation.py --mode exp3a
-    .venv/bin/python experiments/run_critique_remediation.py --mode exp1
-    .venv/bin/python experiments/run_critique_remediation.py --mode all
-"""
-from __future__ import annotations
-
 import os
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl_cache")
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -30,12 +20,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from flopt.config import FLConfig
 from flopt.data import ClientData
-from flopt.dirichlet import make_dirichlet_clients_from_arrays
+from flopt.dirichlet import dirichlet_split
 from flopt.duality import solve_policy_lp
-from flopt.fedavg import _device, evaluate_all, federated_train
+from flopt.fedavg import evaluate_all, federated_train
+from flopt.utils import _device
 from flopt.fedprox import fedprox_train
-from flopt.io import convergence_summary, flatten_round_records, write_csv, write_json
-from flopt.mimic import load_mimic_iv_arrays
+from flopt.io import convergence_summary, round_records_to_csv, write_csv, write_json
+from flopt.mimic import load_mimic
 from flopt.models import LogisticModel, TabularMLP, count_parameters
 from flopt.resource_watchdog import ResourceWatchdog
 
@@ -51,7 +42,7 @@ FRESH_SEEDS = [
 ]
 
 
-def _base_config(bundle) -> FLConfig:
+def _base_config(bundle):
     return FLConfig(
         rounds=80,
         max_rounds=80,
@@ -152,7 +143,7 @@ def run_beta_placement(out: Path, bundle):
 # ---------------------------------------------------------------------------
 
 def _train_and_save_checkpoint(bundle, base, model_factory, seed, mu, out_path):
-    """Train a model and save checkpoint. Returns (model, records)."""
+
     if out_path.exists():
         print(f"    Checkpoint exists: {out_path.name}")
         state = torch.load(out_path, map_location="cpu", weights_only=True)
@@ -172,7 +163,7 @@ def _train_and_save_checkpoint(bundle, base, model_factory, seed, mu, out_path):
 
 
 def _evaluate_model_on_clients(model, clients, device):
-    """Evaluate model per client, return list of per-client dicts."""
+
     from sklearn.metrics import average_precision_score, balanced_accuracy_score, confusion_matrix
     model.eval()
     rows = []
@@ -200,7 +191,7 @@ def _evaluate_model_on_clients(model, clients, device):
 
 
 def _get_predictions_for_client(model, client, device):
-    """Get per-sample predictions for threshold sweep."""
+
     model.eval()
     x = torch.tensor(client.x_test, dtype=torch.float32).to(device)
     with torch.no_grad():
@@ -445,7 +436,7 @@ def run_dirichlet_k9(out: Path, bundle, base, mlp_factory, beta_result):
     count = 0
     for beta in grid_floats:
         for seed in seeds:
-            clients, _, _ = make_dirichlet_clients_from_arrays(arrays_path, beta, 9, seed)
+            clients, _, _ = dirichlet_split(arrays_path, beta, 9, seed)
             if len(clients) < 3:
                 print(f"  Skipping beta={beta} seed={seed}: only {len(clients)} clients")
                 continue
@@ -479,7 +470,7 @@ def run_cvar_k30(out: Path, bundle, base, mlp_factory):
     rows = []
     for alpha in alphas:
         for seed in seeds:
-            clients, _, _ = make_dirichlet_clients_from_arrays(arrays_path, 0.5, 30, seed)
+            clients, _, _ = dirichlet_split(arrays_path, 0.5, 30, seed)
             cfg = replace(base, seed=seed, cvar_alpha=alpha,
                           clients_per_round=min(20, len(clients)))
             model = mlp_factory()
@@ -491,7 +482,7 @@ def run_cvar_k30(out: Path, bundle, base, mlp_factory):
             print(f"  CVaR alpha={alpha} seed={seed} stopped={c['stopped_round']}")
 
     for seed in seeds:
-        clients, _, _ = make_dirichlet_clients_from_arrays(arrays_path, 0.5, 30, seed)
+        clients, _, _ = dirichlet_split(arrays_path, 0.5, 30, seed)
         cfg = replace(base, seed=seed, clients_per_round=min(20, len(clients)))
         model = mlp_factory()
         model, records, _ = fedprox_train(model, clients, cfg, mu=0.1)
@@ -1068,7 +1059,7 @@ def run_preprocessing_sensitivity(out: Path, bundle, base, mlp_factory):
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _strip(c: dict) -> dict:
+def _strip(c: dict):
     return {k: v for k, v in c.items() if k not in {"run_type", "seed", "alpha", "max_rounds"}}
 
 
@@ -1100,7 +1091,7 @@ def main():
 
     try:
         print(f"Loading MIMIC-IV data from {args.mimic_out}...")
-        bundle = load_mimic_iv_arrays(Path(args.mimic_out), seed=7)
+        bundle = load_mimic(Path(args.mimic_out), seed=7)
         feature_count = len(bundle.feature_names)
         base = _base_config(bundle)
         mlp_factory = lambda: TabularMLP(feature_count, 2, hidden=(256, 128, 64), dropout=0.1)

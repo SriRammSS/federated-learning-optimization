@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import argparse
 import json
@@ -14,20 +13,21 @@ import torch
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
-from flopt.analysis import ablation_rows,communication_efficiency_rows,failure_mode_rows,selected_case_clients,summarize_rows
+from flopt.analysis import ablation_deltas,communication_efficiency,failure_modes,selected_case_clients,summarize_rows
 from flopt.baselines import centralized_train,train_client_model
 from flopt.calibration import calibration_bins
 from flopt.config import FLConfig
 from flopt.duality import solve_policy_lp
-from flopt.fedavg import _device,evaluate_all,federated_train,predict_clients
-from flopt.io import convergence_summary,ensure_dirs,flatten_round_records,write_csv,write_json
-from flopt.metrics import binary_clinical_scores,binary_per_client_rows,classification_rows,confusion_rows,pr_curve_rows,roc_curve_rows
-from flopt.mimic import load_mimic_iv_arrays
+from flopt.fedavg import evaluate_all,federated_train,predict_clients
+from flopt.utils import _device
+from flopt.io import convergence_summary,ensure_dirs,round_records_to_csv,write_csv,write_json
+from flopt.metrics import binary_clinical_scores,client_scores,classification_report,confusion_table,pr_curve,roc_curve
+from flopt.mimic import load_mimic
 from flopt.models import TabularMLP,count_parameters
 from flopt.plots import bar,line_mean_std,scatter,scatter3
 from flopt.profiling import timed
 from flopt.search import ga_search,grid_search
-from flopt.stats import confidence_rows,correlation_rows,paired_tests
+from flopt.stats import confidence_intervals,correlations,paired_tests
 
 
 ALPHAS=[0,0.5,0.75,0.9,0.95]
@@ -35,7 +35,7 @@ SEEDS=[7,11,19,23,29,31,37,41,43,47]
 GRID=[(1,3,0.003),(1,5,0.005),(1,7,0.005),(2,5,0.003),(2,7,0.005),(1,9,0.003),(2,3,0.01),(3,5,0.003)]
 
 
-def main()->None:
+def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--mimic-out",default="outputs/full_mimic_iv")
     parser.add_argument("--out",default="outputs/full_mimic_iv_training")
@@ -62,7 +62,7 @@ def main()->None:
     seeds=[int(s) for s in args.seeds.split(",") if s.strip()]
 
     with timed("load_mimic_arrays",runtime):
-        bundle=load_mimic_iv_arrays(Path(args.mimic_out),seed=seeds[0])
+        bundle=load_mimic(Path(args.mimic_out),seed=seeds[0])
         clients=bundle.clients
     model_factory=lambda:TabularMLP(len(bundle.feature_names),2,hidden=(256,128,64),dropout=0.1)
     base=FLConfig(
@@ -155,13 +155,13 @@ def main()->None:
         pred_rows=predict_clients(best_model,clients)
         add_client_names(pred_rows,bundle.client_names)
         write_csv(out/"metrics"/"predictions.csv",pred_rows)
-        write_csv(out/"metrics"/"classification_report.csv",classification_rows(pred_rows,bundle.class_names))
-        write_csv(out/"metrics"/"confusion_matrix.csv",confusion_rows(pred_rows,bundle.class_names))
+        write_csv(out/"metrics"/"classification_report.csv",classification_report(pred_rows,bundle.class_names))
+        write_csv(out/"metrics"/"confusion_matrix.csv",confusion_table(pred_rows,bundle.class_names))
         write_csv(out/"metrics"/"clinical_scores.csv",[binary_clinical_scores(pred_rows)])
-        per_client=binary_per_client_rows(pred_rows,bundle.client_names)
+        per_client=client_scores(pred_rows,bundle.client_names)
         write_csv(out/"metrics"/"per_client_clinical_metrics.csv",per_client)
-        write_csv(out/"metrics"/"roc_curve.csv",roc_curve_rows(pred_rows))
-        write_csv(out/"metrics"/"precision_recall_curve.csv",pr_curve_rows(pred_rows))
+        write_csv(out/"metrics"/"roc_curve.csv",roc_curve(pred_rows))
+        write_csv(out/"metrics"/"precision_recall_curve.csv",pr_curve(pred_rows))
         cal_rows,cal_summary=calibration_bins(pred_rows)
         write_csv(out/"calibration"/"calibration_bins.csv",cal_rows)
         write_csv(out/"calibration"/"calibration_summary.csv",[cal_summary])
@@ -192,7 +192,7 @@ def main()->None:
     print(f"wrote MIMIC-IV training artifacts to {out}")
 
 
-def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
+def write_metadata(out,args,bundle,base,seeds,model_factory):
     write_json(out/"run_metadata.json",{
         "dataset":"MIMIC-IV ICU mortality",
         "mimic_out":args.mimic_out,
@@ -202,7 +202,6 @@ def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
         "class_names":bundle.class_names,
         "class_weights":bundle.class_weights,
         "seeds":seeds,
-        "config":base.__dict__,
         "threads":args.threads,
         "platform":platform.platform(),
         "torch_version":torch.__version__,
@@ -210,7 +209,7 @@ def write_metadata(out,args,bundle,base,seeds,model_factory)->None:
     })
 
 
-def copy_preprocessor(mimic_out:Path,out:Path)->None:
+def copy_preprocessor(mimic_out:Path,out:Path):
     src=mimic_out/"artifacts"/"mimic_preprocessor.pkl"
     if src.exists():
         shutil.copy2(src,out/"artifacts"/"mimic_preprocessor.pkl")
@@ -221,9 +220,9 @@ def run_seeded_method(name,clients,cfg,seeds,out,all_rounds,conv,model_factory,a
     last_model=None
     for seed in seeds:
         run_cfg=replace(cfg,seed=seed)
-        model,records=federated_train(model_factory(),clients,run_cfg,track_drift=name in {"fedavg_default",f"cvar_{alpha}"})
+        model,records=federated_train(model_factory(),clients,run_cfg,drift=name in {"fedavg_default",f"cvar_{alpha}"})
         last_model=model
-        round_rows=flatten_round_records(records,name,seed,alpha)
+        round_rows=round_records_to_csv(records,name,seed,alpha)
         all_rounds.extend(round_rows)
         write_csv(out/"raw"/f"{name}_seed_{seed}_rounds.csv",round_rows)
         c=convergence_summary(records,name,seed,alpha,run_cfg.max_rounds or run_cfg.rounds)
@@ -240,7 +239,7 @@ def run_seeded_centralized(clients,cfg,seeds,out,all_rounds,conv,model_factory):
         run_cfg=replace(cfg,seed=seed)
         model,records=centralized_train(model_factory(),clients,run_cfg)
         last_model=model
-        rr=flatten_round_records(records,"centralized",seed)
+        rr=round_records_to_csv(records,"centralized",seed)
         all_rounds.extend(rr)
         write_csv(out/"raw"/f"centralized_seed_{seed}_rounds.csv",rr)
         c=convergence_summary(records,"centralized",seed,None,run_cfg.max_rounds or run_cfg.rounds)
@@ -305,39 +304,39 @@ def write_drift(out,name,seed,records):
 
 
 def flatten_lp(rows):
-    out=[]
+    result=[]
     for r in rows:
         kkt=r.get("kkt",{})
-        out.append({"budget":r.get("budget"),"loss":r.get("loss"),"cost":r.get("cost"),"lambda":r.get("lambda"),"status":r.get("status"),**kkt})
-    return out
+        result.append({"budget":r.get("budget"),"loss":r.get("loss"),"cost":r.get("cost"),"lambda":r.get("lambda"),"status":r.get("status"),**kkt})
+    return result
 
 
 def run_diagnostics(out,method_seed_rows,per_client,conv):
     metrics=["final_accuracy","final_auroc","final_auprc","final_balanced_accuracy","final_sensitivity","final_specificity","final_worst_client_recall","total_comm_until_stop","stopped_round"]
-    write_csv(out/"stats"/"confidence_intervals.csv",confidence_rows(method_seed_rows,"method",metrics))
+    write_csv(out/"stats"/"confidence_intervals.csv",confidence_intervals(method_seed_rows,"method",metrics))
     write_csv(out/"stats"/"paired_tests.csv",paired_tests(method_seed_rows,"method","seed",metrics,"fedavg_default"))
-    write_csv(out/"ablations"/"ablation_deltas.csv",ablation_rows(method_seed_rows))
-    write_csv(out/"efficiency"/"communication_efficiency.csv",communication_efficiency_rows(method_seed_rows,threshold=0.25))
-    write_csv(out/"failure_modes"/"failure_modes.csv",failure_mode_rows(method_seed_rows)+clinical_failure_modes(method_seed_rows))
+    write_csv(out/"ablations"/"ablation_deltas.csv",ablation_deltas(method_seed_rows))
+    write_csv(out/"efficiency"/"communication_efficiency.csv",communication_efficiency(method_seed_rows,threshold=0.25))
+    write_csv(out/"failure_modes"/"failure_modes.csv",failure_modes(method_seed_rows)+clinical_failure_modes(method_seed_rows))
     noniid_path=Path("outputs/full_mimic_iv/noniid/client_distribution_metrics.csv")
     if noniid_path.exists():
         noniid=read_csv_dicts(noniid_path)
-        write_csv(out/"noniid"/"noniid_performance_correlations.csv",correlation_rows(noniid,per_client,"client_id",["js_divergence","mortality_rate","samples"],["auprc","sensitivity","balanced_accuracy"]))
+        write_csv(out/"noniid"/"noniid_performance_correlations.csv",correlations(noniid,per_client,"client_id",["js_divergence","mortality_rate","samples"],["auprc","sensitivity","balanced_accuracy"]))
     case_ids=selected_case_clients([{"client_id":r["client_id"],"accuracy":r["balanced_accuracy"]} for r in per_client])
     write_csv(out/"case_studies"/"selected_clients.csv",[{"client_id":cid} for cid in case_ids])
 
 
 def clinical_failure_modes(rows):
-    out=[]
+    flags=[]
     for row in rows:
         if float(row.get("final_sensitivity",1) or 0)<0.50:
-            out.append({**row,"failure_type":"low_mortality_recall","description":"Mortality sensitivity is below 0.50."})
+            flags.append({**row,"failure_type":"low_mortality_recall","description":"Mortality sensitivity is below 0.50."})
         if float(row.get("final_auprc",1) or 0)<0.20:
-            out.append({**row,"failure_type":"low_auprc","description":"AUPRC remains low for the imbalanced mortality task."})
-    return out
+            flags.append({**row,"failure_type":"low_auprc","description":"AUPRC remains low for the imbalanced mortality task."})
+    return flags
 
 
-def read_csv_dicts(path:Path)->list[dict]:
+def read_csv_dicts(path:Path):
     import csv
     with path.open(newline="",encoding="utf-8") as f:
         return list(csv.DictReader(f))
