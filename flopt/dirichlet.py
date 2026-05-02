@@ -15,11 +15,11 @@ def dirichlet_split(
     min_test: int = 2,
 ):
     arr = np.load(arrays_path, allow_pickle=True)
-    x = arr["x"].astype("float32")
-    y = arr["y"].astype("int64")
+    x = arr["x"].astype('float32')
+    y = arr["y"].astype('int64')
     splits = arr["split"].astype(str)
-    train_idx = np.where(splits == "train")[0]
-    test_idx = np.where(splits == "test")[0]
+    train_idx = np.where(splits == 'train')[0]
+    test_idx = np.where(splits == 'test')[0]
     train_parts = _partition_indices(train_idx, y[train_idx], beta, k_clients, seed)
     test_parts = _partition_indices(test_idx, y[test_idx], beta, k_clients, seed + 100_000)
 
@@ -64,7 +64,7 @@ def _partition_indices(indices, labels, beta, k_clients, seed):
     for idxs in by_label:
         rng.shuffle(idxs)
 
-    if str(beta).lower() in {"inf", "infinity", "none"}:
+    if str(beta).lower() in {'inf', 'infinity', 'none'}:
         parts = [[] for _ in range(k_clients)]
         merged = indices.copy()
         rng.shuffle(merged)
@@ -85,7 +85,7 @@ def _partition_indices(indices, labels, beta, k_clients, seed):
     return [np.array(p, dtype=np.int64) for p in parts]
 
 
-def partition_audit(dist_rows: list[dict]):
+def partition_audit(dist_rows):
     groups = {}
     for row in dist_rows:
         key = (row["beta"], row["seed"], row["split"])

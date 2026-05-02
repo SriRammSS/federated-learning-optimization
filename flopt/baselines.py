@@ -15,13 +15,13 @@ from .utils import _device,_loss_fn,_optimizer
 def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig):
     device=_device()
     model=deepcopy(model).to(device)
-    x=np.concatenate([c.x_train for c in clients]).astype("float32")
-    y=np.concatenate([c.y_train for c in clients]).astype("int64")
+    x=np.concatenate([c.x_train for c in clients]).astype('float32')
+    y=np.concatenate([c.y_train for c in clients]).astype('int64')
     loader=DataLoader(TensorDataset(torch.tensor(x),torch.tensor(y)),batch_size=cfg.batch_size,shuffle=True)
     opt=_optimizer(model,cfg)
     loss_fn=_loss_fn(cfg,device)
     records=[]
-    best=float("inf")
+    best=float('inf')
     stale=0
     max_rounds=cfg.max_rounds or cfg.rounds
     for epoch in range(1,max_rounds+1):

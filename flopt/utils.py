@@ -16,10 +16,10 @@ def _set_seed(seed):
 
 def _device():
     if torch.backends.mps.is_available():
-        return torch.device("mps")
+        return torch.device('mps')
     if torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
+        return torch.device('cuda')
+    return torch.device('cpu')
 
 
 def _loss_fn(cfg,device):
@@ -30,7 +30,7 @@ def _loss_fn(cfg,device):
 
 
 def _optimizer(model,cfg):
-    if cfg.optimizer=="adam":
+    if cfg.optimizer=='adam':
         return torch.optim.Adam(model.parameters(),lr=cfg.lr)
     return torch.optim.SGD(model.parameters(),lr=cfg.lr)
 

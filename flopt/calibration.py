@@ -4,7 +4,7 @@ import numpy as np
 from .metrics import prediction_arrays
 
 
-def calibration_bins(preds:list[dict],bins:int=10):
+def calibration_bins(preds,bins:int=10):
     y_true,y_pred,conf,_=prediction_arrays(preds)
     correct=(y_true==y_pred).astype(float)
     edges=np.linspace(0,1,bins+1)

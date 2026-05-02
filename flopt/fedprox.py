@@ -30,12 +30,12 @@ def fedprox_train(
     sparsity_rows=[]
     client_ids=list(range(len(clients)))
     max_rounds=cfg.max_rounds or cfg.rounds
-    best_value=float("inf")
+    best_value=float('inf')
     best_round=0
     stale_rounds=0
     best_state=None
 
-    for round_id in range(1,max_rounds+1):
+    for rnd in range(1,max_rounds+1):
         selected=random.sample(client_ids,min(cfg.clients_per_round,len(client_ids)))
         local_states=[]
         local_sizes=[]
@@ -48,7 +48,7 @@ def fedprox_train(
             loss=train_one_client_fedprox(local_model,clients[cid],cfg,device,global_ref,mu)
             state_cpu={k:v.detach().cpu() for k,v in local_model.state_dict().items()}
             if sparsity:
-                sparsity_rows.extend(compute_sparsity(base_state,state_cpu,round_id,cid,"fedprox",cfg.seed,mu))
+                sparsity_rows.extend(compute_sparsity(base_state,state_cpu,rnd,cid,'fedprox',cfg.seed,mu))
             local_states.append(state_cpu)
             local_sizes.append(len(clients[cid].x_train))
             local_losses.append(loss)
@@ -60,14 +60,14 @@ def fedprox_train(
         current=float(metrics[cfg.monitor])
         if current<best_value-cfg.min_delta:
             best_value=current
-            best_round=round_id
+            best_round=rnd
             stale_rounds=0
             best_state={k:v.detach().cpu().clone() for k,v in global_model.state_dict().items()}
         else:
             stale_rounds+=1
         stopped=bool(cfg.early_stopping and stale_rounds>=cfg.patience)
         metrics.update({
-            "round":round_id,
+            "round":rnd,
             "selected_clients":selected,
             "upload_bytes":count_parameters(global_model)*4*len(selected),
             "download_bytes":count_parameters(global_model)*4*len(selected),
