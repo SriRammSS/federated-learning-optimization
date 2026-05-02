@@ -1,8 +1,6 @@
-from __future__ import annotations
 
 import random
 from copy import deepcopy
-from dataclasses import asdict
 
 import numpy as np
 import torch
@@ -13,16 +11,17 @@ from sklearn.metrics import average_precision_score,balanced_accuracy_score,conf
 from .config import FLConfig
 from .data import ClientData
 from .models import count_parameters
+from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
-def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_drift:bool=False)->tuple[nn.Module,list[dict]]:
+def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:bool=False):
     _set_seed(cfg.seed)
     device=_device()
     global_model=deepcopy(model).to(device)
     records=[]
     client_ids=list(range(len(clients)))
     max_rounds=cfg.max_rounds or cfg.rounds
-    best_value=float("inf")
+    best_value=float('inf')
     best_round=0
     stale_rounds=0
     best_state=None
@@ -39,7 +38,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
             local_sizes.append(len(clients[cid].x_train))
             local_losses.append(loss)
         weights=_aggregation_weights(np.array(local_sizes),np.array(local_losses),cfg)
-        drift=_drift_stats(base_state,local_states,selected,weights) if track_drift else {}
+        drift_stats=_drift_stats(base_state,local_states,selected,weights) if drift else {}
         _load_weighted_state(global_model,local_states,weights,device)
         metrics=evaluate_all(global_model,clients,device)
         current=float(metrics[cfg.monitor])
@@ -57,12 +56,11 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
             "selected_clients":selected,
             "upload_bytes":count_parameters(global_model)*4*len(selected),
             "download_bytes":count_parameters(global_model)*4*len(selected),
-            "config":asdict(cfg),
             "best_loss_so_far":best_value,
             "best_round":best_round,
             "rounds_since_improvement":stale_rounds,
             "stopped_early":stopped,
-            **drift,
+            **drift_stats,
         })
         records.append(metrics)
         if stopped:
@@ -72,7 +70,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
     return global_model,records
 
 
-def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->float:
+def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device):
     model.train()
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
@@ -93,7 +91,7 @@ def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch
 
 
 @torch.no_grad()
-def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->dict:
+def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device):
     client_loss=[]
     client_acc=[]
     client_recall=[]
@@ -120,9 +118,17 @@ def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->
     clinical={}
     if len(y_true) and set(y_true.tolist())<= {0,1}:
         tn,fp,fn,tp=confusion_matrix(y_true,y_pred,labels=[0,1]).ravel()
+        try:
+            auroc=float(roc_auc_score(y_true,prob))
+        except ValueError:
+            auroc=0.0
+        try:
+            auprc=float(average_precision_score(y_true,prob))
+        except ValueError:
+            auprc=0.0
         clinical={
-            "auroc":_safe_metric(lambda:roc_auc_score(y_true,prob)),
-            "auprc":_safe_metric(lambda:average_precision_score(y_true,prob)),
+            "auroc":auroc,
+            "auprc":auprc,
             "balanced_accuracy":float(balanced_accuracy_score(y_true,y_pred)),
             "sensitivity":float(tp/(tp+fn)) if tp+fn else 0.0,
             "specificity":float(tn/(tn+fp)) if tn+fp else 0.0,
@@ -140,7 +146,7 @@ def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->
 
 
 @torch.no_grad()
-def evaluate(model:nn.Module,client:ClientData,device:torch.device)->tuple[float,float]:
+def evaluate(model:nn.Module,client:ClientData,device:torch.device):
     loss,acc,_,_,_=evaluate_details(model,client,device)
     return loss,acc
 
@@ -160,7 +166,7 @@ def evaluate_details(model:nn.Module,client:ClientData,device:torch.device):
 
 
 @torch.no_grad()
-def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device|None=None)->list[dict]:
+def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device|None=None):
     device=device or _device()
     model=model.to(device)
     model.eval()
@@ -185,28 +191,8 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
     return rows
 
 
-def _loss_fn(cfg:FLConfig,device:torch.device)->nn.Module:
-    weights=None
-    if cfg.class_weights:
-        weights=torch.tensor(cfg.class_weights,dtype=torch.float32,device=device)
-    return nn.CrossEntropyLoss(weight=weights)
-
-
-def _optimizer(model:nn.Module,cfg:FLConfig):
-    if cfg.optimizer=="adam":
-        return torch.optim.Adam(model.parameters(),lr=cfg.lr)
-    return torch.optim.SGD(model.parameters(),lr=cfg.lr)
-
-
-def _safe_metric(fn)->float:
-    try:
-        return float(fn())
-    except ValueError:
-        return 0.0
-
-
-def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.ndarray:
-    weights=sizes.astype("float64")/sizes.sum()
+def _aggregation_weights(sizes,losses,cfg):
+    weights=sizes.astype('float64')/sizes.sum()
     if cfg.cvar_alpha<=0:
         return weights
     tau=np.quantile(losses,cfg.cvar_alpha)
@@ -218,28 +204,7 @@ def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.nd
     return weights/weights.sum()
 
 
-def _load_weighted_state(model:nn.Module,states:list[dict],weights:np.ndarray,device:torch.device)->None:
-    avg={}
-    for key in states[0]:
-        avg[key]=sum(weights[i]*states[i][key] for i in range(len(states))).to(device)
-    model.load_state_dict(avg)
-
-
-def _set_seed(seed:int)->None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-
-def _device()->torch.device:
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
-
-
-def _drift_stats(base_state:dict,states:list[dict],selected:list[int],weights:np.ndarray)->dict:
+def _drift_stats(base_state,states,selected,weights):
     updates=[]
     norms=[]
     for state in states:

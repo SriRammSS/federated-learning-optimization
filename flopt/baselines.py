@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from copy import deepcopy
 
@@ -9,19 +8,20 @@ from torch.utils.data import DataLoader,TensorDataset
 
 from .config import FLConfig
 from .data import ClientData
-from .fedavg import _device,_loss_fn,_optimizer,evaluate_all
+from .fedavg import evaluate_all
+from .utils import _device,_loss_fn,_optimizer
 
 
-def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tuple[nn.Module,list[dict]]:
+def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig):
     device=_device()
     model=deepcopy(model).to(device)
-    x=np.concatenate([c.x_train for c in clients]).astype("float32")
-    y=np.concatenate([c.y_train for c in clients]).astype("int64")
+    x=np.concatenate([c.x_train for c in clients]).astype('float32')
+    y=np.concatenate([c.y_train for c in clients]).astype('int64')
     loader=DataLoader(TensorDataset(torch.tensor(x),torch.tensor(y)),batch_size=cfg.batch_size,shuffle=True)
     opt=_optimizer(model,cfg)
     loss_fn=_loss_fn(cfg,device)
     records=[]
-    best=float("inf")
+    best=float('inf')
     stale=0
     max_rounds=cfg.max_rounds or cfg.rounds
     for epoch in range(1,max_rounds+1):
@@ -47,14 +47,13 @@ def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tu
     return model,records
 
 
-def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tuple[list[dict],list[dict]]:
+def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig):
     device=_device()
     rows=[]
     round_rows=[]
     for idx,client in enumerate(clients):
         model=model_factory().to(device)
-        local_cfg=cfg
-        train_client_model(model,client,local_cfg,device)
+        train_client_model(model,client,cfg,device)
         metrics=evaluate_all(model,[client],device)
         cid=client.client_id if client.client_id is not None else idx
         rows.append({"client_id":int(cid),"loss":metrics["loss"],"accuracy":metrics["accuracy"],"test_samples":len(client.x_test),"train_samples":len(client.x_train)})
@@ -62,7 +61,7 @@ def local_only_summary(model_factory,clients:list[ClientData],cfg:FLConfig)->tup
     return rows,round_rows
 
 
-def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->None:
+def train_client_model(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device):
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
     loader=DataLoader(TensorDataset(x,y),batch_size=cfg.batch_size,shuffle=True)

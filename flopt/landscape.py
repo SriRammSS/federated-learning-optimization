@@ -1,20 +1,19 @@
-from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch import nn
 
-from .fedavg import _device, _loss_fn
+from .utils import _device,_loss_fn
 from .io import write_csv, write_json
 
 
-def save_model_triplet(out_dir: Path, prefix: str, initial: nn.Module, final: nn.Module, best: nn.Module) -> None:
+def save_checkpoints(out_dir: Path, prefix: str, initial: nn.Module, final: nn.Module, best: nn.Module):
     out_dir.mkdir(parents=True, exist_ok=True)
     torch.save(initial.state_dict(), out_dir / f"{prefix}_initial_model.pt")
     torch.save(final.state_dict(), out_dir / f"{prefix}_final_model.pt")
@@ -32,7 +31,7 @@ def landscape_1d(
     out_png: Path,
     points: int = 41,
     prefix: str = "model",
-) -> list[dict]:
+):
     alphas = np.linspace(-0.5, 1.5, points)
     rows = []
     for alpha in alphas:
@@ -58,7 +57,7 @@ def landscape_2d(
     radius: float = 1.0,
     seed: int = 7,
     prefix: str = "model",
-) -> list[dict]:
+):
     rng = torch.Generator().manual_seed(seed)
     d1 = _random_direction(final_state, rng)
     d2 = _random_direction(final_state, rng)
@@ -76,10 +75,10 @@ def landscape_2d(
     return rows
 
 
-def stratified_validation_subset(clients, max_rows: int = 5000, seed: int = 7) -> tuple[np.ndarray, np.ndarray]:
+def validation_sample(clients, max_rows: int = 5000, seed: int = 7):
     rng = np.random.default_rng(seed)
-    x = np.concatenate([c.x_test for c in clients]).astype("float32")
-    y = np.concatenate([c.y_test for c in clients]).astype("int64")
+    x = np.concatenate([c.x_test for c in clients]).astype('float32')
+    y = np.concatenate([c.y_test for c in clients]).astype('int64')
     idxs = []
     per_class = max(1, max_rows // max(1, len(set(y.tolist()))))
     for label in sorted(set(y.tolist())):
@@ -96,7 +95,7 @@ def stratified_validation_subset(clients, max_rows: int = 5000, seed: int = 7) -
     return x[idx], y[idx]
 
 
-def _eval_model(model: nn.Module, x: np.ndarray, y: np.ndarray, cfg) -> tuple[float, float]:
+def _eval_model(model, x, y, cfg):
     device = _device()
     model = deepcopy(model).to(device)
     model.eval()
@@ -111,7 +110,7 @@ def _eval_model(model: nn.Module, x: np.ndarray, y: np.ndarray, cfg) -> tuple[fl
     return loss, acc
 
 
-def _interpolate_state(initial: dict, final: dict, alpha: float) -> dict:
+def _interpolate_state(initial, final, alpha):
     out = {}
     for key, val in final.items():
         if torch.is_floating_point(val):
@@ -121,7 +120,7 @@ def _interpolate_state(initial: dict, final: dict, alpha: float) -> dict:
     return out
 
 
-def _random_direction(state: dict, rng: torch.Generator) -> dict:
+def _random_direction(state, rng):
     direction = {}
     norm_sq = 0.0
     for key, val in state.items():
@@ -135,7 +134,7 @@ def _random_direction(state: dict, rng: torch.Generator) -> dict:
     return {k: (v / norm if torch.is_floating_point(v) else v) for k, v in direction.items()}
 
 
-def _plane_state(center: dict, d1: dict, d2: dict, a: float, b: float) -> dict:
+def _plane_state(center, d1, d2, a, b):
     out = {}
     scale = _state_norm(center)
     for key, val in center.items():
@@ -146,7 +145,7 @@ def _plane_state(center: dict, d1: dict, d2: dict, a: float, b: float) -> dict:
     return out
 
 
-def _state_norm(state: dict) -> float:
+def _state_norm(state):
     total = 0.0
     for val in state.values():
         if torch.is_floating_point(val):
@@ -154,7 +153,7 @@ def _state_norm(state: dict) -> float:
     return max(total ** 0.5, 1e-12)
 
 
-def _plot_1d(rows: list[dict], path: Path, title: str) -> None:
+def _plot_1d(rows, path, title):
     path.parent.mkdir(parents=True, exist_ok=True)
     plt.figure(figsize=(7, 4))
     plt.plot([r["alpha"] for r in rows], [r["loss"] for r in rows], marker="o")
@@ -166,7 +165,7 @@ def _plot_1d(rows: list[dict], path: Path, title: str) -> None:
     plt.close()
 
 
-def _plot_2d(rows: list[dict], path: Path, title: str) -> None:
+def _plot_2d(rows, path, title):
     path.parent.mkdir(parents=True, exist_ok=True)
     xs = sorted({r["x"] for r in rows})
     ys = sorted({r["y"] for r in rows})
@@ -176,7 +175,7 @@ def _plot_2d(rows: list[dict], path: Path, title: str) -> None:
         for j, x in enumerate(xs):
             mat[i, j] = lookup[(x, y)]
     plt.figure(figsize=(6, 5))
-    plt.imshow(mat, origin="lower", extent=[min(xs), max(xs), min(ys), max(ys)], aspect="auto", cmap="viridis")
+    plt.imshow(mat, origin='lower', extent=[min(xs), max(xs), min(ys), max(ys)], aspect="auto", cmap='viridis')
     plt.colorbar(label="loss")
     plt.xlabel("direction 1")
     plt.ylabel("direction 2")
@@ -186,5 +185,5 @@ def _plot_2d(rows: list[dict], path: Path, title: str) -> None:
     plt.close()
 
 
-def write_landscape_config(path: Path, config: dict) -> None:
+def write_landscape_config(path: Path, config: dict):
     write_json(path, config)

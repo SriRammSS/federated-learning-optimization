@@ -1,13 +1,12 @@
-from __future__ import annotations
 
 import numpy as np
 
 
-def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rtol:float=1e-6,atol:float=1e-5)->list[dict]:
+def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rtol:float=1e-6,atol:float=1e-5):
     import cvxpy as cp
 
-    losses_np=np.array(losses,dtype="float64")
-    costs_np=np.array(costs,dtype="float64")
+    losses_np=np.array(losses,dtype='float64')
+    costs_np=np.array(costs,dtype='float64')
     cost_scale=max(float(np.max(np.abs(costs_np))),1.0)
     scaled_costs=costs_np/cost_scale
     rows=[]
@@ -18,7 +17,7 @@ def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rto
         budget_constraint=scaled_costs@x<=scaled_budget
         problem=cp.Problem(cp.Minimize(losses_np@x),[simplex,budget_constraint])
         _solve(problem,cp)
-        if problem.status not in {"optimal","optimal_inaccurate"}:
+        if problem.status not in {"optimal",'optimal_inaccurate'}:
             rows.append({"budget":budget,"status":problem.status})
             continue
         weights=np.asarray(x.value).reshape(-1)
@@ -35,17 +34,17 @@ def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rto
     return rows
 
 
-def _solve(problem,cp)->None:
+def _solve(problem,cp):
     for solver in [cp.CLARABEL,cp.HIGHS,cp.OSQP,cp.SCS]:
         try:
             problem.solve(solver=solver,verbose=False)
-            if problem.status in {"optimal","optimal_inaccurate"}:
+            if problem.status in {"optimal",'optimal_inaccurate'}:
                 return
         except cp.SolverError:
             continue
 
 
-def _kkt(losses:np.ndarray,costs:np.ndarray,x:np.ndarray,budget:float,lam:float,mu:float,rtol:float,atol:float)->dict:
+def _kkt(losses,costs,x,budget,lam,mu,rtol,atol):
     active=x>1e-6
     stationarity=losses[active]+lam*costs[active]+mu
     budget_slack=costs@x-budget
@@ -56,7 +55,7 @@ def _kkt(losses:np.ndarray,costs:np.ndarray,x:np.ndarray,budget:float,lam:float,
     feasible=bool(simplex_err<=atol and budget_slack<=budget_tol and np.all(x>=-atol))
     dual=bool(lam>=-atol)
     near=bool((not feasible and budget_slack<=10*budget_tol) or stat<=1e-4 or comp<=1e-4)
-    status="pass" if feasible and dual and comp<=1e-5 else "near_pass" if dual and near else "fail"
+    status='pass' if feasible and dual and comp<=1e-5 else 'near_pass' if dual and near else 'fail'
     return {
         "primal_feasible":feasible,
         "dual_feasible":dual,
