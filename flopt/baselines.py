@@ -9,7 +9,8 @@ from torch.utils.data import DataLoader,TensorDataset
 
 from .config import FLConfig
 from .data import ClientData
-from .fedavg import _device,_loss_fn,_optimizer,evaluate_all
+from .fedavg import evaluate_all
+from .utils import _device,_loss_fn,_optimizer
 
 
 def centralized_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig)->tuple[nn.Module,list[dict]]:

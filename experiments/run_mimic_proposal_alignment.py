@@ -18,7 +18,8 @@ from flopt.analysis import summarize_rows
 from flopt.config import FLConfig
 from flopt.dirichlet import make_dirichlet_clients_from_arrays, partition_audit_rows
 from flopt.duality import solve_policy_lp
-from flopt.fedavg import _device, federated_train
+from flopt.fedavg import federated_train
+from flopt.utils import _device
 from flopt.fedprox import fedprox_train
 from flopt.io import convergence_summary, flatten_round_records, write_csv, write_json
 from flopt.landscape import (

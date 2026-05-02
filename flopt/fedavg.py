@@ -13,6 +13,7 @@ from sklearn.metrics import average_precision_score,balanced_accuracy_score,conf
 from .config import FLConfig
 from .data import ClientData
 from .models import count_parameters
+from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
 def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_drift:bool=False)->tuple[nn.Module,list[dict]]:
@@ -185,19 +186,6 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
     return rows
 
 
-def _loss_fn(cfg:FLConfig,device:torch.device)->nn.Module:
-    weights=None
-    if cfg.class_weights:
-        weights=torch.tensor(cfg.class_weights,dtype=torch.float32,device=device)
-    return nn.CrossEntropyLoss(weight=weights)
-
-
-def _optimizer(model:nn.Module,cfg:FLConfig):
-    if cfg.optimizer=="adam":
-        return torch.optim.Adam(model.parameters(),lr=cfg.lr)
-    return torch.optim.SGD(model.parameters(),lr=cfg.lr)
-
-
 def _safe_metric(fn)->float:
     try:
         return float(fn())
@@ -216,27 +204,6 @@ def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.nd
     # CVaR weighting keeps FedAvg's sample-size signal while lifting high-loss clients.
     weights=weights*(1+cfg.fairness_strength*tail/tail.sum())
     return weights/weights.sum()
-
-
-def _load_weighted_state(model:nn.Module,states:list[dict],weights:np.ndarray,device:torch.device)->None:
-    avg={}
-    for key in states[0]:
-        avg[key]=sum(weights[i]*states[i][key] for i in range(len(states))).to(device)
-    model.load_state_dict(avg)
-
-
-def _set_seed(seed:int)->None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-
-def _device()->torch.device:
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
 
 
 def _drift_stats(base_state:dict,states:list[dict],selected:list[int],weights:np.ndarray)->dict:
