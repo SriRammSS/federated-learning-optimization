@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import random
 from copy import deepcopy
@@ -15,7 +14,7 @@ from .models import count_parameters
 from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
-def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:bool=False)->tuple[nn.Module,list[dict]]:
+def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:bool=False):
     _set_seed(cfg.seed)
     device=_device()
     global_model=deepcopy(model).to(device)
@@ -71,7 +70,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:
     return global_model,records
 
 
-def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->float:
+def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device):
     model.train()
     x=torch.tensor(client.x_train,dtype=torch.float32)
     y=torch.tensor(client.y_train,dtype=torch.long)
@@ -92,7 +91,7 @@ def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch
 
 
 @torch.no_grad()
-def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->dict:
+def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device):
     client_loss=[]
     client_acc=[]
     client_recall=[]
@@ -147,7 +146,7 @@ def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->
 
 
 @torch.no_grad()
-def evaluate(model:nn.Module,client:ClientData,device:torch.device)->tuple[float,float]:
+def evaluate(model:nn.Module,client:ClientData,device:torch.device):
     loss,acc,_,_,_=evaluate_details(model,client,device)
     return loss,acc
 
@@ -167,7 +166,7 @@ def evaluate_details(model:nn.Module,client:ClientData,device:torch.device):
 
 
 @torch.no_grad()
-def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device|None=None)->list[dict]:
+def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device|None=None):
     device=device or _device()
     model=model.to(device)
     model.eval()
@@ -192,7 +191,7 @@ def predict_clients(model:nn.Module,clients:list[ClientData],device:torch.device
     return rows
 
 
-def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.ndarray:
+def _aggregation_weights(sizes,losses,cfg):
     weights=sizes.astype("float64")/sizes.sum()
     if cfg.cvar_alpha<=0:
         return weights
@@ -205,7 +204,7 @@ def _aggregation_weights(sizes:np.ndarray,losses:np.ndarray,cfg:FLConfig)->np.nd
     return weights/weights.sum()
 
 
-def _drift_stats(base_state:dict,states:list[dict],selected:list[int],weights:np.ndarray)->dict:
+def _drift_stats(base_state,states,selected,weights):
     updates=[]
     norms=[]
     for state in states:

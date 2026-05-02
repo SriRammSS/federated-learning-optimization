@@ -1,9 +1,8 @@
-from __future__ import annotations
 
 import numpy as np
 
 
-def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rtol:float=1e-6,atol:float=1e-5)->list[dict]:
+def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rtol:float=1e-6,atol:float=1e-5):
     import cvxpy as cp
 
     losses_np=np.array(losses,dtype="float64")
@@ -35,7 +34,7 @@ def solve_policy_lp(losses:list[float],costs:list[float],budgets:list[float],rto
     return rows
 
 
-def _solve(problem,cp)->None:
+def _solve(problem,cp):
     for solver in [cp.CLARABEL,cp.HIGHS,cp.OSQP,cp.SCS]:
         try:
             problem.solve(solver=solver,verbose=False)
@@ -45,7 +44,7 @@ def _solve(problem,cp)->None:
             continue
 
 
-def _kkt(losses:np.ndarray,costs:np.ndarray,x:np.ndarray,budget:float,lam:float,mu:float,rtol:float,atol:float)->dict:
+def _kkt(losses,costs,x,budget,lam,mu,rtol,atol):
     active=x>1e-6
     stationarity=losses[active]+lam*costs[active]+mu
     budget_slack=costs@x-budget

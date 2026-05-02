@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -16,7 +15,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 
-def plot_convergence(records:list[dict],path:str)->None:
+def plot_convergence(records:list[dict],path:str):
     rounds=[r["round"] for r in records]
     loss=[r["loss"] for r in records]
     ref=loss[0]/np.sqrt(np.maximum(rounds,1))
@@ -33,7 +32,7 @@ def plot_convergence(records:list[dict],path:str)->None:
 
 
 
-def plot_shadow_price(rows:list[dict],path:str)->None:
+def plot_shadow_price(rows:list[dict],path:str):
     clean=[r for r in rows if r.get("status") in {"optimal","optimal_inaccurate"}]
     _prep(path)
     plt.figure(figsize=(6,4))
@@ -46,11 +45,11 @@ def plot_shadow_price(rows:list[dict],path:str)->None:
 
 
 
-def _prep(path:str)->None:
+def _prep(path):
     Path(path).parent.mkdir(parents=True,exist_ok=True)
 
 
-def bar(rows:list[dict],x:str,y:str,path:str,title:str="",rotation:int=45)->None:
+def bar(rows:list[dict],x:str,y:str,path:str,title:str="",rotation:int=45):
     _prep(path)
     plt.figure(figsize=(8,4))
     plt.bar([str(r[x]) for r in rows],[float(r[y]) for r in rows])
@@ -62,7 +61,7 @@ def bar(rows:list[dict],x:str,y:str,path:str,title:str="",rotation:int=45)->None
     plt.close()
 
 
-def grouped_bar(rows:list[dict],x:str,ys:list[str],path:str,title:str="")->None:
+def grouped_bar(rows:list[dict],x:str,ys:list[str],path:str,title:str=""):
     _prep(path)
     labels=[str(r[x]) for r in rows]
     pos=np.arange(len(labels))
@@ -78,7 +77,7 @@ def grouped_bar(rows:list[dict],x:str,ys:list[str],path:str,title:str="")->None:
     plt.close()
 
 
-def line_mean_std(round_rows:list[dict],metric:str,path:str,title:str="")->None:
+def line_mean_std(round_rows:list[dict],metric:str,path:str,title:str=""):
     _prep(path)
     rounds=sorted({int(r["round"]) for r in round_rows})
     mean=[]
@@ -101,7 +100,7 @@ def line_mean_std(round_rows:list[dict],metric:str,path:str,title:str="")->None:
     plt.close()
 
 
-def heatmap(matrix:np.ndarray,xlabels:list[str],ylabels:list[str],path:str,title:str="",xlabel:str="",ylabel:str="")->None:
+def heatmap(matrix:np.ndarray,xlabels:list[str],ylabels:list[str],path:str,title:str="",xlabel:str="",ylabel:str=""):
     _prep(path)
     plt.figure(figsize=(9,6))
     plt.imshow(matrix,aspect="auto",cmap="viridis")
@@ -117,7 +116,7 @@ def heatmap(matrix:np.ndarray,xlabels:list[str],ylabels:list[str],path:str,title
     plt.close()
 
 
-def scatter(rows:list[dict],x:str,y:str,path:str,title:str="",color:str|None=None)->None:
+def scatter(rows:list[dict],x:str,y:str,path:str,title:str="",color:str|None=None):
     _prep(path)
     plt.figure(figsize=(6,4))
     c=[float(r[color]) for r in rows] if color else None
@@ -132,7 +131,7 @@ def scatter(rows:list[dict],x:str,y:str,path:str,title:str="",color:str|None=Non
     plt.close()
 
 
-def scatter3(rows:list[dict],x:str,y:str,z:str,path:str,title:str="",color:str|None=None)->None:
+def scatter3(rows:list[dict],x:str,y:str,z:str,path:str,title:str="",color:str|None=None):
     _prep(path)
     fig=plt.figure(figsize=(7,5))
     ax=fig.add_subplot(111,projection="3d")
@@ -149,7 +148,7 @@ def scatter3(rows:list[dict],x:str,y:str,z:str,path:str,title:str="",color:str|N
     plt.close()
 
 
-def pca_plots(x:np.ndarray,labels:list,activity_names:list[str],path2d:str,path3d:str,title_prefix:str)->None:
+def pca_plots(x:np.ndarray,labels:list,activity_names:list[str],path2d:str,path3d:str,title_prefix:str):
     pca=PCA(n_components=3,random_state=0)
     pts=pca.fit_transform(x)
     _prep(path2d)

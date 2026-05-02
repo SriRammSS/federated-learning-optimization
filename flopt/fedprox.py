@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import random
 from copy import deepcopy
@@ -23,17 +22,12 @@ def fedprox_train(
     mu:float=0.01,
     drift:bool=False,
     sparsity:bool=False,
-)->tuple[nn.Module,list[dict],list[dict]]:
-    """FedProx training with the same record schema as FedAvg.
-
-    The local objective is CE(w; D_k) + mu/2 * ||w - w_global||^2. Setting
-    mu=0 is a sanity check that this reduces to FedAvg local training.
-    """
+):
     _set_seed(cfg.seed)
     device=_device()
     global_model=deepcopy(model).to(device)
-    records:list[dict]=[]
-    sparsity_rows:list[dict]=[]
+    records=[]
+    sparsity_rows=[]
     client_ids=list(range(len(clients)))
     max_rounds=cfg.max_rounds or cfg.rounds
     best_value=float("inf")

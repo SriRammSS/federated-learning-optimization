@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from dataclasses import replace
 
@@ -10,7 +9,7 @@ from .fedavg import federated_train
 from .models import HARMLP
 
 
-def ga_search(clients,base_cfg:FLConfig,bounds=None,maxiter:int=4,popsize:int=5,gamma:float=1e-8,model_factory=None,score_key:str="accuracy",min_score:float=0.80)->dict:
+def ga_search(clients,base_cfg:FLConfig,bounds=None,maxiter:int=4,popsize:int=5,gamma:float=1e-8,model_factory=None,score_key:str="accuracy",min_score:float=0.80):
     model_factory=model_factory or HARMLP
     if bounds is None:
         bounds=[(1,8),(3,min(20,len(clients))),(0.001,0.08)]
@@ -34,7 +33,7 @@ def ga_search(clients,base_cfg:FLConfig,bounds=None,maxiter:int=4,popsize:int=5,
     return {"x":result.x.tolist(),"fitness":float(result.fun),"evaluations":int(result.nfev),"history":history}
 
 
-def grid_search(clients,base_cfg:FLConfig,grid:list[tuple[int,int,float]],gamma:float=1e-8,model_factory=None,score_key:str="accuracy",min_score:float=0.80)->list[dict]:
+def grid_search(clients,base_cfg:FLConfig,grid:list[tuple[int,int,float]],gamma:float=1e-8,model_factory=None,score_key:str="accuracy",min_score:float=0.80):
     model_factory=model_factory or HARMLP
     rows=[]
     for local_epochs,clients_per_round,lr in grid:
