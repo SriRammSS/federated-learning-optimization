@@ -1,8 +1,6 @@
-from __future__ import annotations
 
 import random
 from copy import deepcopy
-from dataclasses import asdict
 
 import numpy as np
 import torch

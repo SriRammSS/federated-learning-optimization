@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 from pathlib import Path
 
@@ -110,4 +109,4 @@ def partition_audit_rows(dist_rows:list[dict]) -> list[dict]:
             "mortality_rate_min":float(rates.min()) if len(rates) else 0.0,
             "mortality_rate_max":float(rates.max()) if len(rates) else 0.0,
         })
-    return out
+    return audit

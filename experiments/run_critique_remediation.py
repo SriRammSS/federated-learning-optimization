@@ -22,7 +22,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
 from flopt.config import FLConfig
 from flopt.data import ClientData
-from flopt.dirichlet import make_dirichlet_clients_from_arrays
+from flopt.dirichlet import dirichlet_split
 from flopt.duality import solve_policy_lp
 from flopt.fedavg import _device,federated_train
 from flopt.fedprox import fedprox_train
@@ -42,7 +42,7 @@ FRESH_SEEDS=[
 ]
 
 
-def _base_config(bundle) -> FLConfig:
+def _base_config(bundle):
     return FLConfig(
         rounds=80,
         max_rounds=80,

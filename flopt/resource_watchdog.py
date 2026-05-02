@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import os
 import platform
@@ -29,7 +28,7 @@ class ResourceWatchdog:
         self._thread=threading.Thread(target=self._loop,daemon=True)
         self._thread.start()
 
-    def stop(self) -> None:
+    def stop(self):
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=5)
@@ -72,7 +71,7 @@ class ResourceWatchdog:
             }]
             write_csv(self.out_dir / "resource_summary.csv",summary)
 
-    def _loop(self) -> None:
+    def _loop(self):
         while not self._stop.is_set():
             self.check(self._stage)
             self.flush()
@@ -84,8 +83,8 @@ def sample_resources(stage:str) -> dict:
     return {"timestamp":time.time(),"stage":stage,"pid":os.getpid(),**mem}
 
 
-def _memory_gb() -> dict:
-    if platform.system() == "Darwin":
+def _memory_gb():
+    if platform.system() == 'Darwin':
         return _darwin_memory_gb()
     return _linux_memory_gb()
 
@@ -112,7 +111,7 @@ def _linux_memory_gb() -> dict:
         return _fallback_memory_gb()
 
 
-def _darwin_memory_gb() -> dict:
+def _darwin_memory_gb():
     try:
         page_size=16384.0
         total=int(subprocess.check_output(["/usr/sbin/sysctl","-n","hw.memsize"],text=True).strip()) / 1e9
@@ -141,7 +140,7 @@ def _darwin_memory_gb() -> dict:
         return _fallback_memory_gb()
 
 
-def _darwin_swap_used_gb() -> float:
+def _darwin_swap_used_gb():
     try:
         text=subprocess.check_output(["/usr/sbin/sysctl","-n","vm.swapusage"],text=True)
         marker="used = "
@@ -171,7 +170,7 @@ def _parse_vm_pages(raw:str) -> float:
     return float(token.replace(".",""))
 
 
-def _process_rss_gb() -> float:
+def _process_rss_gb():
     try:
         import resource
         rss=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -182,7 +181,7 @@ def _process_rss_gb() -> float:
         return 0.0
 
 
-def _fallback_memory_gb() -> dict:
+def _fallback_memory_gb():
     return {
         "memory_total_gb":0.0,
         "memory_free_gb":0.0,

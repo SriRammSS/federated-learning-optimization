@@ -1,20 +1,19 @@
-from __future__ import annotations
 
 import numpy as np
 from sklearn.metrics import average_precision_score,balanced_accuracy_score,brier_score_loss,classification_report,confusion_matrix,precision_recall_curve,precision_recall_fscore_support,roc_auc_score,roc_curve
 
 
-def prediction_arrays(pred_rows:list[dict])->tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray]:
-    y_true=np.array([r["y_true"] for r in pred_rows],dtype=int)
-    y_pred=np.array([r["y_pred"] for r in pred_rows],dtype=int)
-    conf=np.array([r["confidence"] for r in pred_rows],dtype=float)
-    client=np.array([r["client_id"] for r in pred_rows],dtype=int)
+def prediction_arrays(preds):
+    y_true=np.array([r["y_true"] for r in preds],dtype=int)
+    y_pred=np.array([r["y_pred"] for r in preds],dtype=int)
+    conf=np.array([r["confidence"] for r in preds],dtype=float)
+    client=np.array([r["client_id"] for r in preds],dtype=int)
     return y_true,y_pred,conf,client
 
 
-def classification_rows(pred_rows:list[dict],activity_names:list[str])->list[dict]:
-    y_true,y_pred,_,_=prediction_arrays(pred_rows)
-    report=classification_report(y_true,y_pred,target_names=activity_names,output_dict=True,zero_division=0)
+def classification_report(preds,activity_names):
+    y_true,y_pred,_,_=prediction_arrays(preds)
+    report=_sklearn_classification_report(y_true,y_pred,target_names=activity_names,output_dict=True,zero_division=0)
     rows=[]
     for label,vals in report.items():
         if isinstance(vals,dict):
@@ -24,8 +23,8 @@ def classification_rows(pred_rows:list[dict],activity_names:list[str])->list[dic
     return rows
 
 
-def confusion_rows(pred_rows:list[dict],activity_names:list[str],normalize:bool=False)->list[dict]:
-    y_true,y_pred,_,_=prediction_arrays(pred_rows)
+def confusion_table(preds,activity_names,normalize:bool=False):
+    y_true,y_pred,_,_=prediction_arrays(preds)
     cm=confusion_matrix(y_true,y_pred,labels=list(range(len(activity_names))),normalize="true" if normalize else None)
     rows=[]
     for i,true_name in enumerate(activity_names):
@@ -40,11 +39,19 @@ def binary_clinical_scores(pred_rows:list[dict])->dict:
     y_true,y_pred,conf,_=prediction_arrays(pred_rows)
     prob=_positive_prob(pred_rows)
     tn,fp,fn,tp=_binary_counts(y_true,y_pred)
+    try:
+        auroc=float(roc_auc_score(y_true,prob))
+    except ValueError:
+        auroc=0.0
+    try:
+        auprc=float(average_precision_score(y_true,prob))
+    except ValueError:
+        auprc=0.0
     return {
         "accuracy":float((y_true==y_pred).mean()),
         "balanced_accuracy":float(balanced_accuracy_score(y_true,y_pred)) if len(set(y_true.tolist()))>1 else 0.0,
-        "auroc":_safe_auc(y_true,prob),
-        "auprc":_safe_auprc(y_true,prob),
+        "auroc":auroc,
+        "auprc":auprc,
         "sensitivity":float(tp/(tp+fn)) if tp+fn else 0.0,
         "specificity":float(tn/(tn+fp)) if tn+fp else 0.0,
         "precision_ppv":float(tp/(tp+fp)) if tp+fp else 0.0,
@@ -58,31 +65,31 @@ def binary_clinical_scores(pred_rows:list[dict])->dict:
     }
 
 
-def binary_per_client_rows(pred_rows:list[dict],client_names:dict[int,str]|None=None)->list[dict]:
-    y_true,y_pred,_,client_ids=prediction_arrays(pred_rows)
-    prob=_positive_prob(pred_rows)
+def client_scores(preds,client_names=None):
+    y_true,y_pred,_,client_ids=prediction_arrays(preds)
+    prob=_positive_prob(preds)
     rows=[]
     client_names=client_names or {}
     for cid in sorted(set(client_ids.tolist())):
         mask=client_ids==cid
-        sub=[pred_rows[i] for i in np.where(mask)[0]]
+        sub=[preds[i] for i in np.where(mask)[0]]
         scores=binary_clinical_scores(sub)
         rows.append({"client_id":int(cid),"client_name":client_names.get(int(cid),str(cid)),"test_samples":int(mask.sum()),"deaths":int(y_true[mask].sum()),**scores})
     return rows
 
 
-def roc_curve_rows(pred_rows:list[dict])->list[dict]:
-    y_true,_,_,_=prediction_arrays(pred_rows)
-    prob=_positive_prob(pred_rows)
+def roc_curve(preds):
+    y_true,_,_,_=prediction_arrays(preds)
+    prob=_positive_prob(preds)
     if len(set(y_true.tolist()))<2:
         return []
-    fpr,tpr,thr=roc_curve(y_true,prob)
+    fpr,tpr,thr=_sklearn_roc_curve(y_true,prob)
     return [{"fpr":float(fpr[i]),"tpr":float(tpr[i]),"threshold":float(thr[i])} for i in range(len(fpr))]
 
 
-def pr_curve_rows(pred_rows:list[dict])->list[dict]:
-    y_true,_,_,_=prediction_arrays(pred_rows)
-    prob=_positive_prob(pred_rows)
+def pr_curve(preds):
+    y_true,_,_,_=prediction_arrays(preds)
+    prob=_positive_prob(preds)
     precision,recall,thr=precision_recall_curve(y_true,prob)
     rows=[]
     for i in range(len(precision)):
@@ -94,21 +101,7 @@ def _positive_prob(pred_rows:list[dict])->np.ndarray:
     return np.array([r.get("prob_1",r.get("confidence",0.0)) for r in pred_rows],dtype=float)
 
 
-def _binary_counts(y_true:np.ndarray,y_pred:np.ndarray)->tuple[int,int,int,int]:
+def _binary_counts(y_true,y_pred):
     cm=confusion_matrix(y_true,y_pred,labels=[0,1])
     tn,fp,fn,tp=cm.ravel()
     return int(tn),int(fp),int(fn),int(tp)
-
-
-def _safe_auc(y_true:np.ndarray,prob:np.ndarray)->float:
-    try:
-        return float(roc_auc_score(y_true,prob))
-    except ValueError:
-        return 0.0
-
-
-def _safe_auprc(y_true:np.ndarray,prob:np.ndarray)->float:
-    try:
-        return float(average_precision_score(y_true,prob))
-    except ValueError:
-        return 0.0

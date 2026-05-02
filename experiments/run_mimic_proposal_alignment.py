@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import argparse
 import csv
@@ -23,8 +22,8 @@ from flopt.io import convergence_summary,flatten_round_records,write_csv,write_j
 from flopt.landscape import (
     landscape_1d,
     landscape_2d,
-    save_model_triplet,
-    stratified_validation_subset,
+    save_checkpoints,
+    validation_sample,
     write_landscape_config,
 )
 from flopt.mimic import load_mimic_iv_arrays

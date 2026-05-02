@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import numpy as np
 import torch
@@ -92,4 +91,4 @@ def dense_vs_sparse_lp_source(method_rows:list[dict],sparsity_rows:list[dict]) -
             "dense_cost":dense,
             "sparse_cost":float(sparse_unit * stopped) if sparse_unit is not None else dense,
         })
-    return out
+    return comparison

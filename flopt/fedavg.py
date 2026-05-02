@@ -1,8 +1,6 @@
-from __future__ import annotations
 
 import random
 from copy import deepcopy
-from dataclasses import asdict
 
 import numpy as np
 import torch
@@ -14,9 +12,10 @@ from .aggregators import aggregation_weights
 from .config import FLConfig
 from .data import ClientData
 from .models import count_parameters
+from .utils import _device,_load_weighted_state,_loss_fn,_optimizer,_set_seed
 
 
-def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_drift:bool=False)->tuple[nn.Module,list[dict]]:
+def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,drift:bool=False):
     _set_seed(cfg.seed)
     device=_device()
     global_model=deepcopy(model).to(device)
@@ -82,7 +81,7 @@ def federated_train(model:nn.Module,clients:list[ClientData],cfg:FLConfig,track_
     return global_model,records
 
 
-def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device)->float:
+def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch.device):
     model.train()
     loader=_client_loader(client,cfg)
     optimizer=_optimizer(model,cfg)
@@ -103,7 +102,7 @@ def train_one_client(model:nn.Module,client:ClientData,cfg:FLConfig,device:torch
 
 
 @torch.no_grad()
-def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device)->dict:
+def evaluate_all(model:nn.Module,clients:list[ClientData],device:torch.device):
     client_loss=[]
     client_accuracy=[]
     client_recall=[]

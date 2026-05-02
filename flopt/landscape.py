@@ -1,10 +1,9 @@
-from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import torch

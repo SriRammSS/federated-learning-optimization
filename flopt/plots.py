@@ -1,4 +1,3 @@
-from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -14,8 +13,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend("Agg")
 import numpy as np
 
-
-def plot_shadow_price(rows:list[dict],path:str)->None:
+def plot_shadow_price(rows:list[dict],path:str):
     clean=[r for r in rows if r.get("status") in {"optimal","optimal_inaccurate"}]
     _prep(path)
     plt.figure(figsize=(6,4))
@@ -31,7 +29,7 @@ def _prep(path:str)->None:
     Path(path).parent.mkdir(parents=True,exist_ok=True)
 
 
-def bar(rows:list[dict],x:str,y:str,path:str,title:str="",rotation:int=45)->None:
+def bar(rows:list[dict],x:str,y:str,path:str,title:str="",rotation:int=45):
     _prep(path)
     plt.figure(figsize=(8,4))
     plt.bar([str(r[x]) for r in rows],[float(r[y]) for r in rows])
@@ -81,7 +79,7 @@ def scatter(rows:list[dict],x:str,y:str,path:str,title:str="",color:str|None=Non
     plt.close()
 
 
-def scatter3(rows:list[dict],x:str,y:str,z:str,path:str,title:str="",color:str|None=None)->None:
+def scatter3(rows:list[dict],x:str,y:str,z:str,path:str,title:str="",color:str|None=None):
     _prep(path)
     fig=plt.figure(figsize=(7,5))
     ax=fig.add_subplot(111,projection="3d")

@@ -1,2 +1,0 @@
-method,seed,stopped_round,stopped_early,best_round,best_loss,final_loss,final_accuracy,final_worst_client_accuracy,total_comm_until_stop,failure_type,description
-ga_best_validated,37,64,True,34,0.14385546914612254,0.19464993389944235,0.9431920886039734,0.5925925970077515,165031936,low_worst_client_accuracy,Worst-client accuracy remains below 0.70.
