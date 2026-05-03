@@ -76,3 +76,5 @@ shakespeare/__pycache__/
 # Allow critical small artefacts
 !outputs/full_mimic_iv_training/
 !outputs/full_mimic_iv_proposal_alignment/
+
+proposal/
